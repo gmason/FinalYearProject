@@ -1,5 +1,4 @@
 //============================================================================
-//COMMMMMENT
 // Name        : MarketDataGenerator.cpp
 // Author      : Gareth Mason
 // Version     :
@@ -13,6 +12,10 @@
 #include <string>
 #include <iomanip>
 #include <list>
+#include <sys/types.h>
+#include <dirent.h>
+#include <errno.h>
+#include <vector>
 #include "symbol.h"
 #include "generatorTemplate.h"
 using namespace std;
@@ -122,8 +125,63 @@ void FileParser (string filename, int arrLength, symbol *arr[ ]) {
 // :%s/_^...._^/ /g
 // :%s/_^...._^/ /g
 // :%s/<tab>/ /g
-int main () {
-  srand(time(0));
+
+int getdir (string dir, vector<string> &files)
+{
+    DIR *dp;
+    struct dirent *dirp;
+    if((dp  = opendir(dir.c_str())) == NULL) {
+        cout << "Error(" << errno << ") opening " << dir << endl;
+        return errno;
+    }
+
+    while ((dirp = readdir(dp)) != NULL) {
+        files.push_back(string(dirp->d_name));
+    }
+    closedir(dp);
+    return 0;
+}
+
+int main()
+{
+    string dir = string("/Users/gtgmason/Documents/workspace/symfiles/sorted/puresym/");
+    vector<string> files = vector<string>();
+    getdir(dir,files);
+    int fileLengths[files.size()];
+    int usableFiles = 0;
+    string fileNames[files.size()];
+
+
+    for (unsigned int i = 0;i < files.size();i++) {
+    	if (i >= 2 && files[i].find("_processed") == string::npos){
+    		usableFiles++;
+    	}
+    }
+
+    for (unsigned int i = 0;i < files.size();i++) {
+    	if (i >= 2 && files[i].find("_processed") == string::npos){
+			stringstream ss;
+			ss << dir << files[i];
+			fileNames[i] = ss.str();
+
+			fileLengths[i] = LengthOfFile(fileNames[i].c_str());
+			symbol* temporaryFileHold[fileLengths[i]];
+
+			FileParser(fileNames[i], fileLengths[i], temporaryFileHold);
+
+	    	for (int j = 0; j < fileLengths[i]; j++)
+	    	{
+	    		temporaryFileHold[j]->print();
+	    	}
+    	}
+    }
+
+    cout << usableFiles	<< endl;
+
+    return 0;
+}
+
+  /*srand(time(0));
   string firstDayfilePath = "/Users/gtgmason/Documents/workspace/symfiles/sorted/tvitch4mc.sym_20121101";
   string secondDayfilePath = "/Users/gtgmason/Documents/workspace/symfiles/sorted/tvitch4mc.sym_20121105";
   int linesFirstDay = LengthOfFile(firstDayfilePath.c_str());
@@ -254,4 +312,4 @@ int main () {
   cout << endl << endl << "Symbol		Base Price	Price Change	Volume		Base Count	Count Change	QuoteCount" << endl;
 
   return 0;
-}
+}*/
