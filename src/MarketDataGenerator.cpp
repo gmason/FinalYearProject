@@ -149,34 +149,52 @@ int main()
     getdir(dir,files);
     int fileLengths[files.size()];
     int usableFiles = 0;
+    int longestFile = 0;
     string fileNames[files.size()];
-
 
     for (unsigned int i = 0;i < files.size();i++) {
     	if (i >= 2 && files[i].find("_processed") == string::npos){
     		usableFiles++;
-    	}
-    }
 
-    for (unsigned int i = 0;i < files.size();i++) {
-    	if (i >= 2 && files[i].find("_processed") == string::npos){
-			stringstream ss;
+    		stringstream ss;
 			ss << dir << files[i];
 			fileNames[i] = ss.str();
 
 			fileLengths[i] = LengthOfFile(fileNames[i].c_str());
+			if (fileLengths[i] > longestFile){
+				longestFile = fileLengths[i];
+			}
+    	}
+    }
+
+    cout << "There are " << usableFiles	<< " usable files, the longest being " << longestFile << endl;
+
+    symbol **snapShots = new symbol*[usableFiles];
+    for(int i = 0; i < usableFiles; ++i) {
+    	snapShots[i] = new symbol[longestFile];
+    }
+
+    int usedFiles = 0;
+
+    for (unsigned int i = 0;i < files.size();i++) {
+    	if (i >= 2 && files[i].find("_processed") == string::npos){
 			symbol* temporaryFileHold[fileLengths[i]];
 
 			FileParser(fileNames[i], fileLengths[i], temporaryFileHold);
 
 	    	for (int j = 0; j < fileLengths[i]; j++)
 	    	{
-	    		temporaryFileHold[j]->print();
+	    		snapShots[usedFiles][j].wIssueSymbol = temporaryFileHold[j]->wIssueSymbol;
+	    		snapShots[usedFiles][j].wTradeCount = temporaryFileHold[j]->wTradeCount;
+	    		snapShots[usedFiles][j].wTradePrice = temporaryFileHold[j]->wTradePrice;
+	    		snapShots[usedFiles][j].wTradeVolume = temporaryFileHold[j]->wTradeVolume;
+
+//	    		snapShots[usedFiles][j].print();
 	    	}
+	    	cout << fileLengths[i] << endl;
+    		usedFiles++;
     	}
     }
-
-    cout << usableFiles	<< endl;
 
     return 0;
 }
