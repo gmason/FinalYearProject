@@ -243,10 +243,15 @@ int main()
     				prices.push_back(snapShots[j][k].wTradePrice);
     				tradeVolumes.push_back(snapShots[j][k].wTradeVolume);
     				tradeCounts.push_back(snapShots[j][k].wTradeCount);
-    		        for (int l = 0; l < usableFiles-1; l++)
+    		       /* int priceChangesTotal = 0;
+    				for (int l = 0; l < usableFiles-1; l++)
     		        {
-    		        	priceChanges.push_back(snapShots[l][k].wTradePrice -  snapShots[l+1][k].wTradePrice);
-    		        }
+    					cout << snapShots[l][k].wTradePrice << endl;
+    		        	priceChanges.push_back(snapShots[l+1][k].wTradePrice - snapShots[l][k].wTradePrice);
+    		        	//priceChangesTotal =
+    		        }*/
+
+    		        //avChange = (priceChangesTotal / usableFiles);
     				break;
     			}
     		}
@@ -254,8 +259,8 @@ int main()
 
         cout << fixed << showpoint;
         cout << setprecision(2);
-        cout << "Symbol: " << wIssueSymbol << "		" << prices[0] << "		" << prices[1] << "		" << prices[2] << endl;
-        cout << "	 " << wIssueSymbol << "		" << priceChanges[0] << "		" << priceChanges[1] << "		" << priceChanges[2] << endl;
+        cout << endl << "Symbol: " << wIssueSymbol << "		" << prices[0] << "		" << prices[1] << "		" << prices[2] << endl;
+        //cout << "	" << wIssueSymbol << "		" << priceChanges[0] << "		" << priceChanges[1] << "		" << priceChanges[2] << endl;
 
         /*generatedSnapShot = new generatorTemplate(wIssueSymbol, prices, priceChanges, avChange, sdChange, percentPositive, wTradeVolume, wTradeCount);
     	generatedSnapShot.print();*/
