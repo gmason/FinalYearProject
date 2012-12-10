@@ -11,6 +11,7 @@
 #include <sstream>
 #include <string>
 #include <iomanip>
+#include <algorithm>
 #include <list>
 #include <sys/types.h>
 #include <dirent.h>
@@ -148,6 +149,7 @@ int main()
     vector<string> files = vector<string>();
     getdir(dir,files);
     int fileLengths[files.size()];
+    int fileLengthsNormalised[files.size()];
     int usableFiles = 0;
     int longestFile = 0;
     string fileNames[files.size()];
@@ -167,8 +169,6 @@ int main()
     	}
     }
 
-    cout << "There are " << usableFiles	<< " usable files, the longest being " << longestFile << endl;
-
     symbol **snapShots = new symbol*[usableFiles];
     for(int i = 0; i < usableFiles; ++i) {
     	snapShots[i] = new symbol[longestFile];
@@ -177,7 +177,8 @@ int main()
     int usedFiles = 0;
 
     for (unsigned int i = 0;i < files.size();i++) {
-    	if (i >= 2 && files[i].find("_processed") == string::npos){
+    	if (i >= 2 && files[i].find("_processed") == string::npos)
+    	{
 			symbol* temporaryFileHold[fileLengths[i]];
 
 			FileParser(fileNames[i], fileLengths[i], temporaryFileHold);
@@ -188,146 +189,78 @@ int main()
 	    		snapShots[usedFiles][j].wTradeCount = temporaryFileHold[j]->wTradeCount;
 	    		snapShots[usedFiles][j].wTradePrice = temporaryFileHold[j]->wTradePrice;
 	    		snapShots[usedFiles][j].wTradeVolume = temporaryFileHold[j]->wTradeVolume;
-
-//	    		snapShots[usedFiles][j].print();
 	    	}
-	    	cout << fileLengths[i] << endl;
+	    	fileLengthsNormalised[usedFiles] = fileLengths[i];
     		usedFiles++;
     	}
     }
 
+    int totalSyms = 0;
+    for (int i = 0; i < usableFiles; i++){
+    	totalSyms += fileLengthsNormalised[i];
+    }
+
+    string symbols[totalSyms];
+    int counter = 0;
+    for (int i = 0; i < usableFiles; i++){
+		for (int j = 0; j < fileLengthsNormalised[i]; j++)
+		{
+			counter ++;
+			symbols[counter] = snapShots[i][j].wIssueSymbol;
+		}
+    }
+
+    sort(symbols,symbols+totalSyms);
+    vector<string> symbolsToCompare;
+
+    for (int i = 0; i < totalSyms; i++)
+    {
+    	if (i <= (totalSyms -2)){
+			if (symbols[i] == symbols[i+2])
+			{
+				symbolsToCompare.push_back(symbols[i]);
+			}
+    	}
+    }
+
+    generatorTemplate* generatedSnapShot;
+    for (unsigned int i = 0; i < symbolsToCompare.size(); i++)
+    {
+    	string wIssueSymbol = symbolsToCompare[i];
+    	vector<double> prices;
+    	vector<double> priceChanges;
+    	double avChange;
+    	double sdChange;
+    	int percentPositive;
+    	vector<int> tradeVolumes;
+    	vector<int> tradeCounts;
+
+        for (int j = 0; j < usableFiles; j++){
+    		for (int k = 0; k < fileLengthsNormalised[j]; k++)
+    		{
+    			if (snapShots[j][k].wIssueSymbol == wIssueSymbol)
+    			{
+    				prices.push_back(snapShots[j][k].wTradePrice);
+    				tradeVolumes.push_back(snapShots[j][k].wTradeVolume);
+    				tradeCounts.push_back(snapShots[j][k].wTradeCount);
+    		        for (int l = 0; l < usableFiles-1; l++)
+    		        {
+    		        	priceChanges.push_back(snapShots[l][k].wTradePrice -  snapShots[l+1][k].wTradePrice);
+    		        }
+    				break;
+    			}
+    		}
+        }
+
+        cout << fixed << showpoint;
+        cout << setprecision(2);
+        cout << "Symbol: " << wIssueSymbol << "		" << prices[0] << "		" << prices[1] << "		" << prices[2] << endl;
+        cout << "	 " << wIssueSymbol << "		" << priceChanges[0] << "		" << priceChanges[1] << "		" << priceChanges[2] << endl;
+
+        /*generatedSnapShot = new generatorTemplate(wIssueSymbol, prices, priceChanges, avChange, sdChange, percentPositive, wTradeVolume, wTradeCount);
+    	generatedSnapShot.print();*/
+    }
+
+
     return 0;
 }
-
-  /*srand(time(0));
-  string firstDayfilePath = "/Users/gtgmason/Documents/workspace/symfiles/sorted/tvitch4mc.sym_20121101";
-  string secondDayfilePath = "/Users/gtgmason/Documents/workspace/symfiles/sorted/tvitch4mc.sym_20121105";
-  int linesFirstDay = LengthOfFile(firstDayfilePath.c_str());
-  int linesSecondDay = LengthOfFile(secondDayfilePath.c_str());
-  symbol* firstDay[linesFirstDay];
-  symbol* secondDay[linesSecondDay];
-  FileParser(firstDayfilePath.c_str(), linesFirstDay, firstDay);
-  FileParser(secondDayfilePath.c_str(), linesSecondDay, secondDay);
-
- std::list<string> symbolsToCompare;
-
-  int longerFile;
-  if (linesSecondDay > linesFirstDay)
-  {
-	  longerFile = linesSecondDay;
-	  for (int i = 0; i < linesSecondDay; i++)
-	  {
-		  for (int j = 0; j < linesFirstDay; j++)
-		  {
-			  if (secondDay[i]->wIssueSymbol.compare(firstDay[j]->wIssueSymbol) == 0)
-			  {
-				  symbolsToCompare.push_back(secondDay[i]->wIssueSymbol);
-			  }
-		  }
-	  }
-  }
-  else
-  {
-	  longerFile = linesFirstDay;
-	  for (int i = 0; i < linesFirstDay; i++)
-	  {
-		  for (int j = 0; j < linesSecondDay; j++)
-		  {
-			  if (firstDay[i]->wIssueSymbol.compare(secondDay[j]->wIssueSymbol) == 0)
-			  {
-				  symbolsToCompare.push_back(secondDay[j]->wIssueSymbol);
-			  }
-		  }
-	  }
-  }
-
-  std::list<symbol> comparedSymbols;
-  list<string>::iterator it = symbolsToCompare.begin();
-
-  generatorTemplate* comparedSymbol;
-  symbol* firstDaySymbol;
-  if (symbolsToCompare.size() >= 0)
-  {
-	  for (int i = 0; i < symbolsToCompare.size(); i++)
-	  {
-		  string symLookingFor = (*it++).c_str();
-		  firstDaySymbol = new symbol("0", 0, 0, 0);
-		  symbol* secondDaySymbol = new symbol("0", 0, 0, 0);
-
-		  for (int j = 0; j < linesFirstDay; j++)
-		  {
-			  if (firstDay[j]->wIssueSymbol == symLookingFor)
-				  firstDaySymbol = firstDay[j];
-		  }
-
-		  for (int k = 0; k < linesSecondDay; k++)
-		  {
-			  if (secondDay[k]->wIssueSymbol == symLookingFor)
-				  secondDaySymbol = secondDay[k];
-		  }
-
-		  double priceChange;
-		  int countChange, volumeToAssign;
-
-		  if (secondDaySymbol->wTradePrice == firstDaySymbol->wTradePrice)
-			  priceChange = secondDaySymbol->wTradePrice;
-		  else
-			  priceChange = secondDaySymbol->wTradePrice - firstDaySymbol->wTradePrice;
-
-		  if (secondDaySymbol->wTradeCount == firstDaySymbol->wTradeCount)
-			  countChange = secondDaySymbol->wTradeCount;
-		  else if ( (secondDaySymbol->wTradeCount - firstDaySymbol->wTradeCount) + secondDaySymbol->wTradeCount  < 0 )
-			  countChange = firstDaySymbol->wTradeCount - secondDaySymbol->wTradeCount;
-		  else
-			  countChange = secondDaySymbol->wTradeCount - firstDaySymbol->wTradeCount;
-
-		  volumeToAssign = firstDaySymbol->wTradeVolume;
-
-		  do
-		  {
-			  if (!(priceChange <= 0.05 && priceChange >= 0.00) || !(priceChange >= -0.05 && priceChange <= 0.00))
-			  {
-				  if (priceChange != 0.00)
-				  {
-					  priceChange = randfrom(0.00, priceChange * (rand() % 5));
-					  int count = 0;
-					  while (priceChange == 0.00)
-					  {
-						  priceChange = randfrom(0.00, (priceChange + 0.05) * (rand() % 5));
-						  count++;
-						  if (count == 5 )
-							  break;
-					  }
-				  }
-			  }
-		  }while (priceChange + secondDaySymbol->wTradePrice <= 0);
-
-		  do
-		  {
-			  if ((countChange <= 20 && countChange >= 0) || (countChange >= -20 && countChange <= 0))
-			  {
-				  countChange = rand() % secondDaySymbol->wTradeCount;
-				  int count = 0;
-				  while (countChange == 0)
-				  {
-					  countChange = rand() % secondDaySymbol->wTradeCount;
-					  count++;
-					  if (count == 5 )
-						  break;
-				  }
-			  }
-		  }while (countChange + secondDaySymbol->wTradeCount < 0);
-
-		  int quotes = ((rand() % 65)+1) * (secondDaySymbol->wTradeCount + countChange);
-
-		  comparedSymbol = new generatorTemplate(secondDaySymbol->wIssueSymbol, secondDaySymbol->wTradePrice, priceChange, volumeToAssign, secondDaySymbol->wTradeCount, countChange, quotes);
-
-		  cout << fixed << showpoint;
-		  cout << setprecision(2);
-		  comparedSymbol->print();
-	  }
-  }
-  cout << endl << endl << "Symbol		Base Price	Price Change	Volume		Base Count	Count Change	QuoteCount" << endl;
-
-  return 0;
-}*/

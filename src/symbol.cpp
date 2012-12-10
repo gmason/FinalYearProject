@@ -15,6 +15,13 @@ symbol::symbol(string _wIssueSymbol, double _wTradePrice, int _wTradeVolume, int
 	wTradeCount = _wTradeCount;
 }
 
+symbol::symbol() {
+	wIssueSymbol = "";
+	wTradePrice = 0;
+	wTradeVolume = 0;
+	wTradeCount = 0;
+}
+
 symbol::~symbol() {
 	// TODO Auto-generated destructor stub
 }
