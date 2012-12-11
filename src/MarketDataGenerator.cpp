@@ -17,6 +17,7 @@
 #include <dirent.h>
 #include <errno.h>
 #include <vector>
+#include <cmath>
 #include "symbol.h"
 #include "generatorTemplate.h"
 using namespace std;
@@ -231,7 +232,7 @@ int main()
     	vector<double> priceChanges;
     	double avChange;
     	double sdChange;
-    	int percentPositive;
+    	double percentPositive;
     	vector<int> tradeVolumes;
     	vector<int> tradeCounts;
 
@@ -243,15 +244,48 @@ int main()
     				prices.push_back(snapShots[j][k].wTradePrice);
     				tradeVolumes.push_back(snapShots[j][k].wTradeVolume);
     				tradeCounts.push_back(snapShots[j][k].wTradeCount);
-    		       /* int priceChangesTotal = 0;
-    				for (int l = 0; l < usableFiles-1; l++)
-    		        {
-    					cout << snapShots[l][k].wTradePrice << endl;
-    		        	priceChanges.push_back(snapShots[l+1][k].wTradePrice - snapShots[l][k].wTradePrice);
-    		        	//priceChangesTotal =
-    		        }*/
 
-    		        //avChange = (priceChangesTotal / usableFiles);
+    				double priceChangesTotal = 0;
+    				double positive = 0;
+    				if (j == usableFiles-1)
+    				{
+    					for (int l = 0; l < usableFiles; l++)
+    					{
+    						if (l < usableFiles-1)
+    						{
+    							double tempChange = prices[l+1]-prices[l];
+    							priceChanges.push_back(tempChange);
+    							// following if statements check whether the change is +ive or -ive, and adjusts
+    							// so they're all positive (for calculating the av change).
+    							if (tempChange < 0)
+        							priceChangesTotal += (tempChange * -1);
+    							else
+    							{
+    								positive++;
+    								priceChangesTotal += tempChange;
+    							}
+    						}
+    						else
+    						{
+    			    			avChange = (priceChangesTotal / (usableFiles-1));
+    			    			percentPositive = positive / (usableFiles-1);
+    						}
+    					}
+    					double sdCalc = 0;
+    					for (int x = 0; x < usableFiles-1; x++)
+    					{
+    						if (priceChanges[x] < 0)
+    							priceChanges[x] = priceChanges[x] * -1;
+    						double tempSdVar = priceChanges[x]-avChange;
+    						if (tempSdVar < 0)
+    							tempSdVar = tempSdVar *-1;
+    						// DEBUG STANDARD DEVIATION // cout << "price " << priceChanges[x] <<  " - av " << avChange << " = " <<  tempSdVar << endl;
+        				    tempSdVar = (tempSdVar*tempSdVar);
+        				    sdCalc += tempSdVar;
+    					}
+    					sdChange = sqrt(sdCalc / (usableFiles-1));
+        		        generatedSnapShot = new generatorTemplate(wIssueSymbol, prices, priceChanges, avChange, sdChange, percentPositive, tradeVolumes, tradeCounts);
+    				}
     				break;
     			}
     		}
@@ -259,13 +293,20 @@ int main()
 
         cout << fixed << showpoint;
         cout << setprecision(2);
-        cout << endl << "Symbol: " << wIssueSymbol << "		" << prices[0] << "		" << prices[1] << "		" << prices[2] << endl;
-        //cout << "	" << wIssueSymbol << "		" << priceChanges[0] << "		" << priceChanges[1] << "		" << priceChanges[2] << endl;
+ //       cout << endl << "Symbol: " << wIssueSymbol << "		" << prices[0] << "		" << prices[1] << "		" << prices[2] << endl;
+ //       cout << "			" << priceChanges[0] << "		" << priceChanges[1] << endl;
 
-        /*generatedSnapShot = new generatorTemplate(wIssueSymbol, prices, priceChanges, avChange, sdChange, percentPositive, wTradeVolume, wTradeCount);
-    	generatedSnapShot.print();*/
+        cout << endl << "Symbol: 		" << generatedSnapShot->wIssueSymbol << "		" << generatedSnapShot->prices[0] << "		" << generatedSnapShot->prices[1] << "		" << generatedSnapShot->prices[2] << endl;
+        cout << "Price Changes:						" << generatedSnapShot->priceChanges[0] << "		" << generatedSnapShot->priceChanges[1] << endl;
+        cout << "Trade Volumes:				" << generatedSnapShot->wTradeVolume[0] << "		" << generatedSnapShot->wTradeVolume[1] << "		" << generatedSnapShot->wTradeVolume[2] << endl;
+        cout << "Trade Counts:				" << generatedSnapShot->wTradeCount[0] << "		" << generatedSnapShot->wTradeCount[1] << "		" << generatedSnapShot->wTradeCount[2] << endl;
+        cout << "Average Change:		" << generatedSnapShot->avChange << endl;
+        cout << "% positive: 		" << generatedSnapShot->percentPositive << endl;
+        cout << "StandardDeviation:	 " << generatedSnapShot->sdChange << endl;
+
+
+        //generatedSnapShot.print();
     }
-
 
     return 0;
 }

@@ -9,7 +9,7 @@
 #include "iostream.h"
 using namespace std;
 
-generatorTemplate::generatorTemplate(string _wIssueSymbol, vector<double> _prices, vector<double> _priceChanges, double _avChange, double _sdChange, int _percentPositive, std::vector<int> _wTradeVolume, std::vector<int> _wTradeCount) {
+generatorTemplate::generatorTemplate(string _wIssueSymbol, vector<double> _prices, vector<double> _priceChanges, double _avChange, double _sdChange, double _percentPositive, std::vector<int> _wTradeVolume, std::vector<int> _wTradeCount) {
 	wIssueSymbol = _wIssueSymbol;
 	prices = _prices;
 	priceChanges = _priceChanges;
