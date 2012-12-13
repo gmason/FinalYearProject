@@ -39,15 +39,28 @@ generatorTemplate::generatorTemplate() {
 
 void generatorTemplate::print()
 {
-	cout << "I have to code the printing..." << endl;
+    cout << endl << "Symbol: 		" << this->wIssueSymbol << "		";
 
-	cout << this->wIssueSymbol << "		" << this->prices[0] << "		" << this->priceChanges[0]
-	     << "		" << this->avChange << "	" << this->sdChange << "	" << this->percentPositive
-	     << "		" << this->wTradeVolume[0] << "		" << this->wTradeCount[0] << endl;
-	for (unsigned int i = 1; i < prices.size(); i++)
-	{
-		cout << "		" << this->prices[i] << "		" << this->priceChanges[i] << "								"
-				<< this->wTradeVolume[i] << "		" << this->wTradeCount[i] << endl;
-	}
+	for (unsigned int i = 0; i < prices.size(); i++)
+		cout  << this->prices[i] << "		";
+
+    cout << endl << "Price Changes:						";
+
+	for (unsigned int i = 0; i < prices.size()-1; i++)
+		cout << this->priceChanges[i] << "		";
+
+    cout << endl << "Trade Volumes:				";
+
+	for (unsigned int i = 0; i < prices.size(); i++)
+		cout << this->wTradeVolume[i] << "		";
+
+	cout << endl << "Trade Counts:				";
+
+	for (unsigned int i = 0; i < prices.size(); i++)
+		cout << this->wTradeCount[i] << "		";
+
+    cout << endl << "Average Change:		" << this->avChange << endl;
+    cout << "% positive: 		" << this->percentPositive << endl;
+    cout << "StandardDeviation:	" << this->sdChange << endl;
 }
 

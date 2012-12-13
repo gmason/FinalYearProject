@@ -144,6 +144,9 @@ int getdir (string dir, vector<string> &files)
     return 0;
 }
 
+static vector<string> symbols;
+static vector<string> symbolsToCompare;
+
 int main()
 {
     string dir = string("/Users/gtgmason/Documents/workspace/symfiles/sorted/puresym/");
@@ -201,27 +204,22 @@ int main()
     	totalSyms += fileLengthsNormalised[i];
     }
 
-    string symbols[totalSyms];
-    int counter = 0;
-    for (int i = 0; i < usableFiles; i++){
-		for (int j = 0; j < fileLengthsNormalised[i]; j++)
+    long counter = 0;
+    for (long i = 0; i < usableFiles; i++){
+		for (long j = 0; j < fileLengthsNormalised[i]; j++)
 		{
 			counter ++;
-			symbols[counter] = snapShots[i][j].wIssueSymbol;
+			symbols.push_back(snapShots[i][j].wIssueSymbol);
 		}
     }
 
-    sort(symbols,symbols+totalSyms);
-    vector<string> symbolsToCompare;
-
-    for (int i = 0; i < totalSyms; i++)
+    sort(symbols.begin(),symbols.end());
+    for (int i = 0; i < totalSyms-(usableFiles-1); i++)
     {
-    	if (i <= (totalSyms -2)){
-			if (symbols[i] == symbols[i+2])
-			{
-				symbolsToCompare.push_back(symbols[i]);
-			}
-    	}
+		if (symbols[i] == symbols[i+(usableFiles-1)])
+		{
+			symbolsToCompare.push_back(symbols[i]);
+		}
     }
 
     generatorTemplate* generatedSnapShot;
@@ -279,7 +277,6 @@ int main()
     						double tempSdVar = priceChanges[x]-avChange;
     						if (tempSdVar < 0)
     							tempSdVar = tempSdVar *-1;
-    						// DEBUG STANDARD DEVIATION // cout << "price " << priceChanges[x] <<  " - av " << avChange << " = " <<  tempSdVar << endl;
         				    tempSdVar = (tempSdVar*tempSdVar);
         				    sdCalc += tempSdVar;
     					}
@@ -293,19 +290,9 @@ int main()
 
         cout << fixed << showpoint;
         cout << setprecision(2);
- //       cout << endl << "Symbol: " << wIssueSymbol << "		" << prices[0] << "		" << prices[1] << "		" << prices[2] << endl;
- //       cout << "			" << priceChanges[0] << "		" << priceChanges[1] << endl;
 
-        cout << endl << "Symbol: 		" << generatedSnapShot->wIssueSymbol << "		" << generatedSnapShot->prices[0] << "		" << generatedSnapShot->prices[1] << "		" << generatedSnapShot->prices[2] << endl;
-        cout << "Price Changes:						" << generatedSnapShot->priceChanges[0] << "		" << generatedSnapShot->priceChanges[1] << endl;
-        cout << "Trade Volumes:				" << generatedSnapShot->wTradeVolume[0] << "		" << generatedSnapShot->wTradeVolume[1] << "		" << generatedSnapShot->wTradeVolume[2] << endl;
-        cout << "Trade Counts:				" << generatedSnapShot->wTradeCount[0] << "		" << generatedSnapShot->wTradeCount[1] << "		" << generatedSnapShot->wTradeCount[2] << endl;
-        cout << "Average Change:		" << generatedSnapShot->avChange << endl;
-        cout << "% positive: 		" << generatedSnapShot->percentPositive << endl;
-        cout << "StandardDeviation:	 " << generatedSnapShot->sdChange << endl;
+        generatedSnapShot->print();
 
-
-        //generatedSnapShot.print();
     }
 
     return 0;
