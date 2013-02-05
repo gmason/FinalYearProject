@@ -21,9 +21,10 @@ class generatorTemplate {
 	public: double percentPositive;
 	public: std::vector<int> wTradeVolume;
 	public: std::vector<int> wTradeCount;
+	public: double nextPrice;
 	public: void print();
 public:
-	generatorTemplate(string, std::vector<double>, std::vector<double>, double, double, double, std::vector<int>, std::vector<int>);
+	generatorTemplate(string, std::vector<double>, std::vector<double>, double, double, double, std::vector<int>, std::vector<int>, double);
 	generatorTemplate();
 	generatorTemplate(const generatorTemplate&);
 	generatorTemplate& operator =(const generatorTemplate& a);

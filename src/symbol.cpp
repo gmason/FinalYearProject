@@ -4,6 +4,7 @@
  *  Created on: Nov 5, 2012
  *      Author: gtgmason
  */
+// symbol descriptor
 
 #include "symbol.h"
 #include "iostream.h"

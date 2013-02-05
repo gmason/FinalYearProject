@@ -20,6 +20,7 @@
 #include <cmath>
 #include "symbol.h"
 #include "generatorTemplate.h"
+#include <ctime>
 using namespace std;
 
 string subStringConverter (string startField, string line)
@@ -63,6 +64,18 @@ double randfrom(double min, double max)
     double range = (max - min);
     double div = RAND_MAX / range;
     return min + (rand() / div);
+}
+
+bool positiveOrNegative(double positive)
+{
+	double val = (double)rand() / RAND_MAX;
+	bool posOrNeg;
+	if (val > positive)       //  %neg
+		posOrNeg = false;
+	else if (val < positive)  //  %pos
+		posOrNeg = true;
+
+	return posOrNeg;
 }
 
 void FileParser (string filename, int arrLength, symbol *arr[ ]) {
@@ -149,6 +162,8 @@ static vector<string> symbolsToCompare;
 
 int main()
 {
+	srand ( time(NULL) );
+
     string dir = string("/Users/gtgmason/Documents/workspace/symfiles/sorted/puresym/");
     vector<string> files = vector<string>();
     getdir(dir,files);
@@ -233,6 +248,9 @@ int main()
     	double percentPositive;
     	vector<int> tradeVolumes;
     	vector<int> tradeCounts;
+    	double nextPriceChange;
+    	double nextPrice;
+    	bool upOrDown;
 
         for (int j = 0; j < usableFiles; j++){
     		for (int k = 0; k < fileLengthsNormalised[j]; k++)
@@ -242,6 +260,8 @@ int main()
     				prices.push_back(snapShots[j][k].wTradePrice);
     				tradeVolumes.push_back(snapShots[j][k].wTradeVolume);
     				tradeCounts.push_back(snapShots[j][k].wTradeCount);
+
+    				//cout <<  "Symbol: " << snapShots[j][k].wIssueSymbol << "	Price: " <<  snapShots[j][k].wTradePrice << "	Volume: " << snapShots[j][k].wTradeVolume << "	Count:" << snapShots[j][k].wTradeCount << endl;
 
     				double priceChangesTotal = 0;
     				double positive = 0;
@@ -281,7 +301,43 @@ int main()
         				    sdCalc += tempSdVar;
     					}
     					sdChange = sqrt(sdCalc / (usableFiles-1));
-        		        generatedSnapShot = new generatorTemplate(wIssueSymbol, prices, priceChanges, avChange, sdChange, percentPositive, tradeVolumes, tradeCounts);
+
+
+    					double lowestChange = priceChanges[0];
+    				    for(int i = 0; i < usableFiles-1; i++)
+    				    {
+    				        if(priceChanges[i] < lowestChange)
+    				        lowestChange = priceChanges[i];
+    				    }
+
+    					double highestChange = priceChanges[0];
+    				    for(int i = 0; i < usableFiles-1; i++)
+    				    {
+    				        if(priceChanges[i] > highestChange)
+    				        highestChange = priceChanges[i];
+    				    }
+
+    				    double r = randfrom(lowestChange, highestChange);
+    				    double s = randfrom(0, sdChange);
+
+    				    if (positiveOrNegative(percentPositive))
+    				    	nextPriceChange = ((r + avChange) / 2) + s;
+    				    else
+    				    	if ((((r + avChange) / 2) - s) < 0)
+    				    		nextPriceChange = ((r + avChange) / 2) + s;
+    				    	else
+    				    		nextPriceChange = ((r + avChange) / 2) - s;
+
+    				    upOrDown = positiveOrNegative(percentPositive);
+
+    				    if (prices[prices.size()-1] - nextPriceChange < 0)
+    				    	nextPrice = prices[prices.size()-1] + nextPriceChange;
+    				    else if (upOrDown)
+    				    	nextPrice = prices[prices.size()-1] + nextPriceChange;
+    				    else
+    				    	nextPrice = prices[prices.size()-1] - nextPriceChange;
+
+        		        generatedSnapShot = new generatorTemplate(wIssueSymbol, prices, priceChanges, avChange, sdChange, percentPositive, tradeVolumes, tradeCounts, nextPrice);
     				}
     				break;
     			}
