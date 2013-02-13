@@ -66,10 +66,10 @@ void generatorTemplate::print()
 	for (unsigned int i = 0; i < prices.size(); i++)
 		cout << this->wTradeCount[i] << "		";
 
-	cout << endl << "Trade Count %s:		";
+	cout << endl << "Trade Count %s need uncommented:		";
 
-	for (unsigned int i = 0; i < prices.size(); i++)
-		cout << this->tradeCountPercent[i] << "		";
+	//for (unsigned int i = 0; i < prices.size(); i++)
+	//	cout << this->tradeCountPercent[i] << "		";
 
     cout << endl << "Average Change:		" << this->avChange << endl;
     cout << "% positive: 		" << this->percentPositive << endl;

@@ -238,7 +238,7 @@ int main()
     }
 
     generatorTemplate* generatedSnapShot;
-	//vector<uint32_t> totalTrades;
+    vector<generatorTemplate*> snapSym;
     vector<int> totalTrades;
 	for (int p = 0; p < usableFiles; p++)
 		totalTrades.push_back(0);
@@ -355,30 +355,74 @@ int main()
         cout << setprecision(2);
 
         // print before percentages calculated
-        //generatedSnapShot->print();
+        // generatedSnapShot->print();
+
+        snapSym.push_back(generatedSnapShot);
     }
 
-    for (int j = 0; j < usableFiles; j++){
-    	for (int k = 0; k < fileLengthsNormalised[j]; k++){
-    		totalTrades[j] += snapShots[j][k].wTradeCount;
+    for (unsigned int j = 0; j < snapSym.size(); j++)
+    {
+    	snapSym[j]->print();
+    	for (int k = 0; k < usableFiles; k++){
+    		totalTrades[k] += snapSym[j]->wTradeCount[k];
+    	}
+    }
 
-        	//cout << "Total trades for day " << j << ": " <<  totalTrades[j] << endl;
-        	//cout << "Day " << j << ": " << tradeCounts[j] << endl;
+	for (int j = 0; j < usableFiles; j++)
+		cout << "Total trades for day " << j << ": " <<  totalTrades[j] << endl;
+
+    cout << setprecision(90);
+
+    long double count1 = 0;
+    long double count2 = 0;
+    long double count3 = 0;
+    long double count4 = 0;
+    long double count5 = 0;
+    long double count6 = 0;
+    long double count7 = 0;
+
+    //vector<long double> counters;
+
+    for (int j = 0; j < usableFiles; j++)
+    {
+    	for (unsigned int k = 0; k < snapSym.size(); k++){
+    		long double percentage = (long double) snapSym[k]->wTradeCount[j] / (long double) totalTrades[j];
+			if (j == 0)
+				count1 += percentage;
+			if (j == 1)
+				count2 += percentage;
+			if (j == 2)
+				count3 += percentage;
+			if (j == 3)
+				count4 += percentage;
+			if (j == 4)
+				count5 += percentage;
+			if (j == 5)
+				count6 += percentage;
+			if (j == 6)
+				count7 += percentage;
     	}
     }
 
 
-    cout << setprecision(100);
-
     for (int j = 0; j < usableFiles; j++){
 		for (int k = 0; k < fileLengthsNormalised[j]; k++){
-			cout << "Day " << j << endl;
-			cout << snapShots[j][k].wIssueSymbol << " has "  << snapShots[j][k].wTradeCount << " trades." << endl;
-			long double percentage = (long double) snapShots[j][k].wTradeCount / (long double) totalTrades[j];
+			//cout << "Day " << j << endl;
+			//cout << snapShots[j][k].wIssueSymbol << " has "  << snapShots[j][k].wTradeCount << " trades." << endl;
+			//long double percentage = (long double) snapShots[j][k].wTradeCount / (long double) totalTrades[j];
 			//cout << snapShots[j][k].wTradeCount << " out of " << totalTrades[j] << " is " << percentage << endl;
 			//generatedSnapShot[j].tradeCountPercent.push_back(percentage);
 		}
     }
+
+    cout << "Day 1: " << count1 << endl;
+    cout << "Day 2: " << count2 << endl;
+    cout << "Day 3: " << count3 << endl;
+    cout << "Day 4: " << count4 << endl;
+    cout << "Day 5: " << count5 << endl;
+    cout << "Day 6: " << count6 << endl;
+    cout << "Day 7: " << count7 << endl;
+
 
 
     return 0;
