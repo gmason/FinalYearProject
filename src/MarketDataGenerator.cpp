@@ -376,12 +376,9 @@ int main()
 			cout << snapShots[j][k].wIssueSymbol << " has "  << snapShots[j][k].wTradeCount << " trades." << endl;
 			long double percentage = (long double) snapShots[j][k].wTradeCount / (long double) totalTrades[j];
 			//cout << snapShots[j][k].wTradeCount << " out of " << totalTrades[j] << " is " << percentage << endl;
-			cout << generatedSnapShot[j].wIssueSymbol << endl;
-			generatedSnapShot[j].tradeCountPercent.push_back(percentage);
+			//generatedSnapShot[j].tradeCountPercent.push_back(percentage);
 		}
     }
-
-    generatedSnapShot->print();
 
 
     return 0;
