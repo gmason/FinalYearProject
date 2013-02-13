@@ -9,7 +9,7 @@
 #include "iostream.h"
 using namespace std;
 
-generatorTemplate::generatorTemplate(string _wIssueSymbol, vector<double> _prices, vector<double> _priceChanges, double _avChange, double _sdChange, double _percentPositive, std::vector<int> _wTradeVolume, std::vector<int> _wTradeCount, double _nextPrice) {
+generatorTemplate::generatorTemplate(string _wIssueSymbol, vector<double> _prices, vector<double> _priceChanges, double _avChange, double _sdChange, double _percentPositive, std::vector<int> _wTradeVolume, std::vector<int> _wTradeCount, std::vector<long double> _tradeCountPercent, double _nextPrice) {
 	wIssueSymbol = _wIssueSymbol;
 	prices = _prices;
 	priceChanges = _priceChanges;
@@ -18,6 +18,7 @@ generatorTemplate::generatorTemplate(string _wIssueSymbol, vector<double> _price
 	percentPositive = _percentPositive;
 	wTradeVolume = _wTradeVolume;
 	wTradeCount = _wTradeCount;
+	tradeCountPercent = _tradeCountPercent;
 	nextPrice = _nextPrice;
 }
 
@@ -34,6 +35,7 @@ generatorTemplate::generatorTemplate() {
 	percentPositive = 0;
 //	wTradeVolume - no constructor required for vector.
 //	wTradeCount - no constructor required for vector.
+//	tradeCountPercent - no constructor required for vector.
 	nextPrice = 0;
 }
 
@@ -63,6 +65,11 @@ void generatorTemplate::print()
 
 	for (unsigned int i = 0; i < prices.size(); i++)
 		cout << this->wTradeCount[i] << "		";
+
+	cout << endl << "Trade Count %s:		";
+
+	for (unsigned int i = 0; i < prices.size(); i++)
+		cout << this->tradeCountPercent[i] << "		";
 
     cout << endl << "Average Change:		" << this->avChange << endl;
     cout << "% positive: 		" << this->percentPositive << endl;
