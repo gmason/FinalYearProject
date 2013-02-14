@@ -161,6 +161,23 @@ int getdir (string dir, vector<string> &files)
     return 0;
 }
 
+double valueGenerator(vector<double> &values, int size, double sd, double av, double high, double low, double percentPos)
+{
+	double r = randfrom(low, high);
+    double s = randfrom(0, sd);
+    double generated = 0;
+
+    if (positiveOrNegative(percentPos))
+    	generated = ((r + av) / 2) + s;
+    else
+    	if ((((r + av) / 2) - s) < 0)
+    		generated = ((r + av) / 2) + s;
+    	else
+    		generated = ((r + av) / 2) - s;
+
+    return generated;
+}
+
 double lowValue(vector<double> &values, int size)
 {
 	double lowest;
@@ -358,7 +375,7 @@ int main()
     					double lowestPriceChange = lowValue(priceChanges, usableFiles-1);
     					double highestPriceChange = highValue(priceChanges, usableFiles-1);
 
-    				    double r = randfrom(lowestPriceChange, highestPriceChange);
+    					/*double r = randfrom(lowestPriceChange, highestPriceChange);
     				    double s = randfrom(0, sdPriceChange);
 
     				    if (positiveOrNegative(percentPositive))
@@ -367,9 +384,10 @@ int main()
     				    	if ((((r + avPriceChange) / 2) - s) < 0)
     				    		nextPriceChange = ((r + avPriceChange) / 2) + s;
     				    	else
-    				    		nextPriceChange = ((r + avPriceChange) / 2) - s;
-
+    				   			nextPriceChange = ((r + avPriceChange) / 2) - s;
+						*/
     				    upOrDown = positiveOrNegative(percentPositive);
+    					nextPriceChange = valueGenerator(prices, usableFiles-1, sdPriceChange, avPriceChange, highestPriceChange, lowestPriceChange, percentPositive);
 
     				    if (prices[prices.size()-1] - nextPriceChange < 0)
     				    	nextPrice = prices[prices.size()-1] + nextPriceChange;
