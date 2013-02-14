@@ -16,16 +16,16 @@ class generatorTemplate {
 	public: string wIssueSymbol;
 	public: std::vector<double> prices;
 	public: std::vector<double> priceChanges;
-	public: double avChange;
-	public: double sdChange;
+	public: double avPriceChange;
+	public: double sdPriceChange;
 	public: double percentPositive;
 	public: std::vector<int> wTradeVolume;
-	public: std::vector<int> wTradeCount;
+	public: std::vector<double> wTradeCount;
 	public: std::vector<long double> tradeCountPercent;
 	public: double nextPrice;
 	public: void print();
 public:
-	generatorTemplate(string, std::vector<double>, std::vector<double>, double, double, double, std::vector<int>, std::vector<int>, std::vector<long double>, double);
+	generatorTemplate(string, std::vector<double>, std::vector<double>, double, double, double, std::vector<int>, std::vector<double>, std::vector<long double>, double);
 	generatorTemplate();
 	generatorTemplate(const generatorTemplate&);
 	generatorTemplate& operator =(const generatorTemplate& a);

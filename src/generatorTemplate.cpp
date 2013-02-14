@@ -10,12 +10,12 @@
 #include <iomanip>
 using namespace std;
 
-generatorTemplate::generatorTemplate(string _wIssueSymbol, vector<double> _prices, vector<double> _priceChanges, double _avChange, double _sdChange, double _percentPositive, std::vector<int> _wTradeVolume, std::vector<int> _wTradeCount, std::vector<long double> _tradeCountPercent, double _nextPrice) {
+generatorTemplate::generatorTemplate(string _wIssueSymbol, vector<double> _prices, vector<double> _priceChanges, double _avPriceChange, double _sdPriceChange, double _percentPositive, std::vector<int> _wTradeVolume, std::vector<double> _wTradeCount, std::vector<long double> _tradeCountPercent, double _nextPrice) {
 	wIssueSymbol = _wIssueSymbol;
 	prices = _prices;
 	priceChanges = _priceChanges;
-	avChange = _avChange;
-	sdChange = _sdChange;
+	avPriceChange = _avPriceChange;
+	sdPriceChange = _sdPriceChange;
 	percentPositive = _percentPositive;
 	wTradeVolume = _wTradeVolume;
 	wTradeCount = _wTradeCount;
@@ -31,8 +31,8 @@ generatorTemplate::generatorTemplate() {
 	wIssueSymbol = "";
 //	prices - no constructor required for vector.
 //	priceChanges - no constructor required for vector.
-	avChange = 0;
-	sdChange = 0;
+	avPriceChange = 0;
+	sdPriceChange = 0;
 	percentPositive = 0;
 //	wTradeVolume - no constructor required for vector.
 //	wTradeCount - no constructor required for vector.
@@ -47,7 +47,16 @@ void generatorTemplate::print()
     cout << fixed << showpoint;
 	cout << setprecision(2);
 	cout << "Symbol: 		" << this->wIssueSymbol << endl;
-	cout << "Prices: 		";
+	cout << "Day:			";
+	for (unsigned int i = 0; i < prices.size(); i++)
+	{
+		if (i == prices.size()-1)
+			cout <<  i+1 << "			" << "Predicted";
+		else
+			cout << i+1 << "		";
+	}
+
+	cout << endl << "Prices: 		";
 
 	for (unsigned int i = 0; i < prices.size(); i++)
 		cout  << this->prices[i] << "		";
@@ -59,15 +68,19 @@ void generatorTemplate::print()
 	for (unsigned int i = 0; i < prices.size()-1; i++)
 		cout << this->priceChanges[i] << "		";
 
+    cout << endl << "Av Price Change:	" << this->avPriceChange << endl;
+    cout << "% positive: 		" << this->percentPositive << endl;
+    cout << "Sd Price Change:	" << this->sdPriceChange << endl;
+
+	cout << "Trade Counts:		";
+
+	for (unsigned int i = 0; i < prices.size(); i++)
+		cout << this->wTradeCount[i] << "		";
+
     cout << endl << "Trade Volumes:		";
 
 	for (unsigned int i = 0; i < prices.size(); i++)
 		cout << this->wTradeVolume[i] << "		";
-
-	cout << endl << "Trade Counts:		";
-
-	for (unsigned int i = 0; i < prices.size(); i++)
-		cout << this->wTradeCount[i] << "		";
 
 	//cout << setprecision(65);
 	//cout << endl << "Trade Count %s:		" << endl;
@@ -75,10 +88,6 @@ void generatorTemplate::print()
 	//for (unsigned int i = 0; i < prices.size(); i++)
 	//	cout << this->tradeCountPercent[i] << "		" << endl;
 
-
-	cout << setprecision(2);
-    cout << endl << "Average Change:		" << this->avChange << endl;
-    cout << "% positive: 		" << this->percentPositive << endl;
-    cout << "StandardDeviation:	" << this->sdChange << endl << endl;
+	cout << endl << endl;
 }
 

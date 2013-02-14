@@ -161,11 +161,43 @@ int getdir (string dir, vector<string> &files)
     return 0;
 }
 
-double sdcalculator(vector<double> &values, double average, int days)
+double lowValue(vector<double> &values, int size)
+{
+	double lowest;
+	for(int i = 0; i < size; i++)
+	{
+	    if(values[i] < lowest)
+	    	lowest = values[i];
+	}
+	return lowest;
+}
+
+double highValue(vector<double> &values, int size)
+{
+	double highest;
+	for(int i = 0; i < size; i++)
+	{
+	    if(values[i] > highest)
+	    	highest = values[i];
+	}
+	return highest;
+}
+
+double avCalculator(vector<double> &values, int size)
+{
+	double runningTotal = 0;
+	for (int x = 0; x < size; x++)
+		runningTotal += values[x];
+
+	double average = runningTotal / (double) size;
+	return average;
+}
+
+double sdCalculator(vector<double> &values, double average, int size)
 {
 	double sdVar;
 
-	for (int x = 0; x < days; x++)
+	for (int x = 0; x < size; x++)
 	{
 		if (values[x] < 0)
 			values[x] = values[x] * -1;
@@ -176,7 +208,7 @@ double sdcalculator(vector<double> &values, double average, int days)
 	    sdVar += tempSdVar;
 	}
 
-	double standardDevation = sqrt(sdVar / (days));
+	double standardDevation = sqrt(sdVar / (size));
 
 	return standardDevation;
 }
@@ -269,11 +301,13 @@ int main()
     	string wIssueSymbol = symbolsToCompare[i];
     	vector<double> prices;
     	vector<double> priceChanges;
-    	double avChange;
-    	double sdChange;
+    	double avPriceChange;
+    	double sdPriceChange;
+    	double avTradeCount;
+    	double sdTradeCount;
     	double percentPositive;
     	vector<int> tradeVolumes;
-    	vector<int> tradeCounts;
+    	vector<double> tradeCounts;
     	vector<long double> tradeCountPercent;
     	double nextPriceChange;
     	double nextPrice;
@@ -289,8 +323,6 @@ int main()
     				tradeCounts.push_back(snapShots[j][k].wTradeCount);
     				//tradeCountPercent.push_back(0);
 
-    				//cout <<  "Symbol: " << snapShots[j][k].wIssueSymbol << "	Price: " <<  snapShots[j][k].wTradePrice << "	Volume: " << snapShots[j][k].wTradeVolume << "	Count:" << snapShots[j][k].wTradeCount << endl;
-
     				double priceChangesTotal = 0;
     				double positive = 0;
     				if (j == usableFiles-1)
@@ -299,51 +331,43 @@ int main()
     					{
     						if (l < usableFiles-1)
     						{
-    							double tempChange = prices[l+1]-prices[l];
-    							priceChanges.push_back(tempChange);
+    							double tempPriceChange = prices[l+1]-prices[l];
+    							priceChanges.push_back(tempPriceChange);
     							// following if statements check whether the change is +ive or -ive, and adjusts
     							// so they're all positive (for calculating the av change).
-    							if (tempChange < 0)
-        							priceChangesTotal += (tempChange * -1);
+    							if (tempPriceChange < 0)
+        							priceChangesTotal += (tempPriceChange * -1);
     							else
     							{
     								positive++;
-    								priceChangesTotal += tempChange;
+    								priceChangesTotal += tempPriceChange;
     							}
     						}
     						else
     						{
-    			    			avChange = (priceChangesTotal / (usableFiles-1));
+    							avPriceChange = (priceChangesTotal / (usableFiles-1));
     			    			percentPositive = positive / (usableFiles-1);
     						}
     					}
 
-    					sdChange = sdcalculator(priceChanges,avChange, usableFiles-1);
+    					sdPriceChange = sdCalculator(priceChanges, avPriceChange, usableFiles-1);
 
-    					double lowestChange = priceChanges[0];
-    				    for(int i = 0; i < usableFiles-1; i++)
-    				    {
-    				        if(priceChanges[i] < lowestChange)
-    				        lowestChange = priceChanges[i];
-    				    }
+    					avTradeCount = avCalculator(tradeCounts, usableFiles-1);
+    					sdTradeCount = sdCalculator(tradeCounts, avTradeCount, usableFiles-1);
 
-    					double highestChange = priceChanges[0];
-    				    for(int i = 0; i < usableFiles-1; i++)
-    				    {
-    				        if(priceChanges[i] > highestChange)
-    				        highestChange = priceChanges[i];
-    				    }
+    					double lowestPriceChange = lowValue(priceChanges, usableFiles-1);
+    					double highestPriceChange = highValue(priceChanges, usableFiles-1);
 
-    				    double r = randfrom(lowestChange, highestChange);
-    				    double s = randfrom(0, sdChange);
+    				    double r = randfrom(lowestPriceChange, highestPriceChange);
+    				    double s = randfrom(0, sdPriceChange);
 
     				    if (positiveOrNegative(percentPositive))
-    				    	nextPriceChange = ((r + avChange) / 2) + s;
+    				    	nextPriceChange = ((r + avPriceChange) / 2) + s;
     				    else
-    				    	if ((((r + avChange) / 2) - s) < 0)
-    				    		nextPriceChange = ((r + avChange) / 2) + s;
+    				    	if ((((r + avPriceChange) / 2) - s) < 0)
+    				    		nextPriceChange = ((r + avPriceChange) / 2) + s;
     				    	else
-    				    		nextPriceChange = ((r + avChange) / 2) - s;
+    				    		nextPriceChange = ((r + avPriceChange) / 2) - s;
 
     				    upOrDown = positiveOrNegative(percentPositive);
 
@@ -354,7 +378,7 @@ int main()
     				    else
     				    	nextPrice = prices[prices.size()-1] - nextPriceChange;
 
-        		        generatedSnapShot = new generatorTemplate(wIssueSymbol, prices, priceChanges, avChange, sdChange, percentPositive, tradeVolumes, tradeCounts, tradeCountPercent, nextPrice);
+        		        generatedSnapShot = new generatorTemplate(wIssueSymbol, prices, priceChanges, avPriceChange, sdPriceChange, percentPositive, tradeVolumes, tradeCounts, tradeCountPercent, nextPrice);
     				}
     				break;
     			}
