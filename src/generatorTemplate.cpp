@@ -7,6 +7,7 @@
 
 #include "generatorTemplate.h"
 #include "iostream.h"
+#include <iomanip>
 using namespace std;
 
 generatorTemplate::generatorTemplate(string _wIssueSymbol, vector<double> _prices, vector<double> _priceChanges, double _avChange, double _sdChange, double _percentPositive, std::vector<int> _wTradeVolume, std::vector<int> _wTradeCount, std::vector<long double> _tradeCountPercent, double _nextPrice) {
@@ -43,6 +44,8 @@ generatorTemplate::generatorTemplate() {
 
 void generatorTemplate::print()
 {
+    cout << fixed << showpoint;
+	cout << setprecision(2);
 	cout << "Symbol: 		" << this->wIssueSymbol << endl;
 	cout << "Prices: 		";
 
@@ -66,11 +69,14 @@ void generatorTemplate::print()
 	for (unsigned int i = 0; i < prices.size(); i++)
 		cout << this->wTradeCount[i] << "		";
 
-	cout << endl << "Trade Count %s need uncommented:		";
+	cout << setprecision(65);
+	cout << endl << "Trade Count %s:		" << endl;
 
-	//for (unsigned int i = 0; i < prices.size(); i++)
-	//	cout << this->tradeCountPercent[i] << "		";
+	for (unsigned int i = 0; i < prices.size(); i++)
+		cout << this->tradeCountPercent[i] << "		" << endl;
 
+
+	cout << setprecision(2);
     cout << endl << "Average Change:		" << this->avChange << endl;
     cout << "% positive: 		" << this->percentPositive << endl;
     cout << "StandardDeviation:	" << this->sdChange << endl << endl;
