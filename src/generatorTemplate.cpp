@@ -69,11 +69,11 @@ void generatorTemplate::print()
 	for (unsigned int i = 0; i < prices.size(); i++)
 		cout << this->wTradeCount[i] << "		";
 
-	cout << setprecision(65);
-	cout << endl << "Trade Count %s:		" << endl;
+	//cout << setprecision(65);
+	//cout << endl << "Trade Count %s:		" << endl;
 
-	for (unsigned int i = 0; i < prices.size(); i++)
-		cout << this->tradeCountPercent[i] << "		" << endl;
+	//for (unsigned int i = 0; i < prices.size(); i++)
+	//	cout << this->tradeCountPercent[i] << "		" << endl;
 
 
 	cout << setprecision(2);

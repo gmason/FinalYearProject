@@ -23,6 +23,10 @@
 #include <ctime>
 using namespace std;
 
+
+static vector<string> symbols;
+static vector<string> symbolsToCompare;
+
 string subStringConverter (string startField, string line)
 {
 	int start, end;
@@ -157,8 +161,25 @@ int getdir (string dir, vector<string> &files)
     return 0;
 }
 
-static vector<string> symbols;
-static vector<string> symbolsToCompare;
+double sdcalculator(vector<double> &values, double average, int days)
+{
+	double sdVar;
+
+	for (int x = 0; x < days; x++)
+	{
+		if (values[x] < 0)
+			values[x] = values[x] * -1;
+		double tempSdVar = values[x]-average;
+		if (tempSdVar < 0)
+			tempSdVar = tempSdVar *-1;
+	    tempSdVar = (tempSdVar*tempSdVar);
+	    sdVar += tempSdVar;
+	}
+
+	double standardDevation = sqrt(sdVar / (days));
+
+	return standardDevation;
+}
 
 int main()
 {
@@ -296,19 +317,8 @@ int main()
     			    			percentPositive = positive / (usableFiles-1);
     						}
     					}
-    					double sdCalc = 0;
-    					for (int x = 0; x < usableFiles-1; x++)
-    					{
-    						if (priceChanges[x] < 0)
-    							priceChanges[x] = priceChanges[x] * -1;
-    						double tempSdVar = priceChanges[x]-avChange;
-    						if (tempSdVar < 0)
-    							tempSdVar = tempSdVar *-1;
-        				    tempSdVar = (tempSdVar*tempSdVar);
-        				    sdCalc += tempSdVar;
-    					}
-    					sdChange = sqrt(sdCalc / (usableFiles-1));
 
+    					sdChange = sdcalculator(priceChanges,avChange, usableFiles-1);
 
     					double lowestChange = priceChanges[0];
     				    for(int i = 0; i < usableFiles-1; i++)
@@ -359,14 +369,15 @@ int main()
 
     for (unsigned int j = 0; j < snapSym.size(); j++)
     {
-    	//snapSym[j]->print();
+    	snapSym[j]->print();
     	for (int k = 0; k < usableFiles; k++){
     		totalTrades[k] += snapSym[j]->wTradeCount[k];
     	}
     }
 
-	for (int j = 0; j < usableFiles; j++)
-		cout << "Total trades for day " << j << ": " <<  totalTrades[j] << endl;
+    // Debug trade count totals
+	//for (int j = 0; j < usableFiles; j++)
+	//	cout << "Total trades for day " << j << ": " <<  totalTrades[j] << endl;
 
     // debugging var. Ensures all probabilities add to 1
     vector<long double> counters;
@@ -376,7 +387,6 @@ int main()
     	counters.push_back(0);
     	for (unsigned int k = 0; k < snapSym.size(); k++){
     		long double percentage = (long double) snapSym[k]->wTradeCount[j] / (long double) totalTrades[j];
-    		//snapSym[k]->tradeCountPercent[j] = percentage;
     		snapSym[k]->tradeCountPercent.push_back(percentage);
     		counters[j] += percentage;
     	}
@@ -390,8 +400,8 @@ int main()
     	}
     }
 
-    cout << "Big dirty total: " << entireTotal << endl;
-
+//    Debug for making sure all percentages add up to 1
+//    cout << "Big dirty total: " << entireTotal / usableFiles << endl;
 
 //    for (unsigned int j = 0; j < snapSym.size(); j++)
 //    	snapSym[j]->print();
