@@ -178,6 +178,20 @@ double valueGenerator(vector<double> &values, int size, double sd, double av, do
     return generated;
 }
 
+double valueGenerator(vector<double> &values, int size, double sd, double av, double high, double low)
+{
+	double r = randfrom(low, high);
+    double s = randfrom(0, sd);
+    double generated = 0;
+
+    if ((((r + av) / 2) - s) < 0)
+   		generated = ((r + av) / 2) + s;
+   	else
+    	generated = ((r + av) / 2) - s;
+
+    return generated;
+}
+
 double lowValue(vector<double> &values, int size)
 {
 	double lowest;
@@ -368,24 +382,9 @@ int main()
     					}
 
     					sdPriceChange = sdCalculator(priceChanges, avPriceChange, usableFiles-1);
-
-    					avTradeCount = avCalculator(tradeCounts, usableFiles-1);
-    					sdTradeCount = sdCalculator(tradeCounts, avTradeCount, usableFiles-1);
-
     					double lowestPriceChange = lowValue(priceChanges, usableFiles-1);
     					double highestPriceChange = highValue(priceChanges, usableFiles-1);
 
-    					/*double r = randfrom(lowestPriceChange, highestPriceChange);
-    				    double s = randfrom(0, sdPriceChange);
-
-    				    if (positiveOrNegative(percentPositive))
-    				    	nextPriceChange = ((r + avPriceChange) / 2) + s;
-    				    else
-    				    	if ((((r + avPriceChange) / 2) - s) < 0)
-    				    		nextPriceChange = ((r + avPriceChange) / 2) + s;
-    				    	else
-    				   			nextPriceChange = ((r + avPriceChange) / 2) - s;
-						*/
     				    upOrDown = positiveOrNegative(percentPositive);
     					nextPriceChange = valueGenerator(prices, usableFiles-1, sdPriceChange, avPriceChange, highestPriceChange, lowestPriceChange, percentPositive);
 
@@ -396,7 +395,15 @@ int main()
     				    else
     				    	nextPrice = prices[prices.size()-1] - nextPriceChange;
 
-        		        generatedSnapShot = new generatorTemplate(wIssueSymbol, prices, priceChanges, avPriceChange, sdPriceChange, percentPositive, tradeVolumes, tradeCounts, tradeCountPercent, nextPrice);
+    					avTradeCount = avCalculator(tradeCounts, usableFiles);
+    					sdTradeCount = sdCalculator(tradeCounts, avTradeCount, usableFiles);
+    					double lowestTradeCount = lowValue(tradeCounts, usableFiles);
+    					double highestTradeCount = highValue(tradeCounts, usableFiles);
+
+    					double nextTradeCount = valueGenerator(tradeCounts, usableFiles, sdTradeCount, avTradeCount, highestTradeCount, lowestTradeCount);
+    					int nextTrades = (int) nextTradeCount;
+
+        		        generatedSnapShot = new generatorTemplate(wIssueSymbol, prices, priceChanges, avPriceChange, sdPriceChange, percentPositive, tradeVolumes, tradeCounts, avTradeCount, sdTradeCount, tradeCountPercent, nextPrice, nextTrades);
     				}
     				break;
     			}

@@ -10,7 +10,7 @@
 #include <iomanip>
 using namespace std;
 
-generatorTemplate::generatorTemplate(string _wIssueSymbol, vector<double> _prices, vector<double> _priceChanges, double _avPriceChange, double _sdPriceChange, double _percentPositive, std::vector<int> _wTradeVolume, std::vector<double> _wTradeCount, std::vector<long double> _tradeCountPercent, double _nextPrice) {
+generatorTemplate::generatorTemplate(string _wIssueSymbol, vector<double> _prices, vector<double> _priceChanges, double _avPriceChange, double _sdPriceChange, double _percentPositive, std::vector<int> _wTradeVolume, std::vector<double> _wTradeCount,  double _avTrades, double _sdTrades, std::vector<long double> _tradeCountPercent, double _nextPrice, int _nextTrades) {
 	wIssueSymbol = _wIssueSymbol;
 	prices = _prices;
 	priceChanges = _priceChanges;
@@ -19,8 +19,11 @@ generatorTemplate::generatorTemplate(string _wIssueSymbol, vector<double> _price
 	percentPositive = _percentPositive;
 	wTradeVolume = _wTradeVolume;
 	wTradeCount = _wTradeCount;
+	avTrades = _avTrades;
+	sdTrades = _sdTrades;
 	tradeCountPercent = _tradeCountPercent;
 	nextPrice = _nextPrice;
+	nextTrades = _nextTrades;
 }
 
 generatorTemplate::~generatorTemplate() {
@@ -36,8 +39,11 @@ generatorTemplate::generatorTemplate() {
 	percentPositive = 0;
 //	wTradeVolume - no constructor required for vector.
 //	wTradeCount - no constructor required for vector.
+	avTrades = 0;
+	sdTrades = 0;
 //	tradeCountPercent - no constructor required for vector.
 	nextPrice = 0;
+	nextTrades = 0;
 }
 
 
@@ -74,8 +80,13 @@ void generatorTemplate::print()
 
 	cout << "Trade Counts:		";
 
-	for (unsigned int i = 0; i < prices.size(); i++)
-		cout << this->wTradeCount[i] << "		";
+	for (unsigned int i = 0; i < wTradeCount.size(); i++)
+		cout << (int) this->wTradeCount[i] << "		";
+
+	cout << "	" << this->nextTrades;
+
+    cout << endl << "Av Trades: 		" << this->avTrades << endl;
+    cout << "Sd Trades:		" << this->sdTrades;
 
     cout << endl << "Trade Volumes:		";
 
@@ -88,6 +99,6 @@ void generatorTemplate::print()
 	//for (unsigned int i = 0; i < prices.size(); i++)
 	//	cout << this->tradeCountPercent[i] << "		" << endl;
 
-	cout << endl << endl;
+	cout << endl << endl << endl;
 }
 
