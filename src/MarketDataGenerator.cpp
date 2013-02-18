@@ -21,6 +21,11 @@
 #include "symbol.h"
 #include "generatorTemplate.h"
 #include <ctime>
+#include <map>
+#include <stdlib.h>
+#include "boost/random.hpp"
+#include "boost/generator_iterator.hpp"
+#include <sys/time.h>
 using namespace std;
 
 
@@ -68,6 +73,39 @@ double randfrom(double min, double max)
     double range = (max - min);
     double div = RAND_MAX / range;
     return min + (rand() / div);
+}
+
+long double randfrom(long double min, long double max)
+{
+	long double range = (max - min);
+	long double div = RAND_MAX / range;
+    return min + (rand() / div);
+}
+
+long double getRandom(long double min, long double max)
+{
+  timeval t;
+  gettimeofday(&t,NULL);
+  boost::mt19937 seed( (int)t.tv_sec );
+  boost::uniform_real<> dist(min,max);
+  boost::variate_generator<boost::mt19937&, boost::uniform_real<> > random(seed,dist);
+  return random();
+}
+
+double DoubleRand() {
+  typedef unsigned long long uint64;
+  uint64 ret=0;
+  for(int i=0;i<13;i++)ret|=((uint64)(rand()%16)<<i*4);
+  if(ret==0)return(rand()%2?1.0f:0.0f);
+  uint64 retb=ret;
+  unsigned int exp=0x3ff;
+  retb=ret|((uint64)(exp)<<52);
+  double *tmp=(double*)&retb;
+  double retval=*tmp;
+  while(retval>1.0f||retval<0.0f)
+    retval=*(tmp=(double*)&(retb=ret|((uint64)(exp--)<<52)));
+  if(rand()%2)retval-=0.5f;
+  return retval;
 }
 
 bool positiveOrNegative(double positive)
@@ -159,6 +197,26 @@ int getdir (string dir, vector<string> &files)
     }
     closedir(dp);
     return 0;
+}
+
+int binarySearch(vector<long double> arr, long double value, int left, int right) {
+	cout << value << endl;
+	while (left <= right) {
+		int middle = (left + right+1) / 2;
+		if (arr[middle] == value || (arr[middle] < value && arr[middle+1] > value) || arr[middle] == arr[left])
+			return middle;
+		else if (arr[middle] > value)
+			right = middle - 1;
+		else
+			left = middle + 1;
+	}
+
+	cout << "DEBUG:	left	" << left << endl;
+	cout << "DEBUG: arr[left]		" << arr[left]  << endl;
+	cout << "DEBUG:	right	" << right  << endl;
+	cout << "DEBUG:	arr[right]	" << arr[right]  << endl;
+	cout << "DEBUG:	value	" << value  << endl;
+	return -1;
 }
 
 double valueGenerator(vector<double> &values, int size, double sd, double av, double high, double low, double percentPos)
@@ -414,31 +472,36 @@ int main()
         snapSym.push_back(generatedSnapShot);
     }
 
+   	vector<int> cumulativeTrades;
+   	vector<long double> cumulativeTradePer;
     totalTrades = 0;
     for (unsigned int j = 0; j < snapSym.size(); j++)
+    {
     	totalTrades += snapSym[j]->nextTrades;
-
+    	cumulativeTrades.push_back(totalTrades);
+    }
 
     long double totalTradesPredicted = 0;
    	for (unsigned int k = 0; k < snapSym.size(); k++){
     	long double percentage = (long double) snapSym[k]->nextTrades / (long double) totalTrades;
    		snapSym[k]->tradeCountPercent = percentage;
    		totalTradesPredicted += percentage;
+   		cumulativeTradePer.push_back(totalTradesPredicted);
     	snapSym[k]->print();
     }
 
+   	for (int i = 0; i < totalTrades; i++)
+   	{
+   	    //long double temp = getRandom(0, totalTradesPredicted);
+   	    long double temp  = DoubleRand();
+   	    int pos = binarySearch(cumulativeTradePer, temp, 0, cumulativeTradePer.size());
+   	    cout << "Position:		" << pos << endl;
+   	    if (pos != -1)
+   	    	cout << "Dice rolled:		" << temp << "	corresponds to	" << snapSym[pos]->wIssueSymbol << endl;
+   	}
+
    	cout << "The total trades: 			" << totalTrades << endl;
    	cout << "Total Trades percentage:		" << totalTradesPredicted << endl;
-
-//    Debug for making sure all percentages add up to 1
-//    cout << "Big dirty total: " << entireTotal / usableFiles << endl;
-
-//    for (unsigned int j = 0; j < snapSym.size(); j++)
-//    	snapSym[j]->print();
-
-//    Debugging loop. Ensures all probabilities add to 1
-//    for (int j = 0; j < usableFiles; j++)
-//    	cout << "Day " << j << " : " << counters[j] << endl;
 
     return 0;
 }
