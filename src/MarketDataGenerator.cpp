@@ -75,6 +75,13 @@ double randfrom(double min, double max)
     return min + (rand() / div);
 }
 
+int randfrom(int min, int max)
+{
+    int range = (max - min);
+    int div = RAND_MAX / range;
+    return min + (rand() / div);
+}
+
 long double randfrom(long double min, long double max)
 {
 	long double range = (max - min);
@@ -200,11 +207,11 @@ int getdir (string dir, vector<string> &files)
 }
 
 int binarySearch(vector<long double> arr, long double value, int left, int right) {
-	cout << value << endl;
+	//cout << value << endl;
 	while (left <= right) {
 		int middle = (left + right+1) / 2;
 		if (arr[middle] == value || (arr[middle] < value && arr[middle+1] > value) || arr[middle] == arr[left])
-			return middle;
+			return middle-1;
 		else if (arr[middle] > value)
 			right = middle - 1;
 		else
@@ -222,7 +229,7 @@ int binarySearch(vector<long double> arr, long double value, int left, int right
 double valueGenerator(vector<double> &values, int size, double sd, double av, double high, double low, double percentPos)
 {
 	double r = randfrom(low, high);
-    double s = randfrom(0, sd);
+    double s = randfrom((double)0, (double)sd);
     double generated = 0;
 
     if (positiveOrNegative(percentPos))
@@ -239,7 +246,7 @@ double valueGenerator(vector<double> &values, int size, double sd, double av, do
 double valueGenerator(vector<double> &values, int size, double sd, double av, double high, double low)
 {
 	double r = randfrom(low, high);
-    double s = randfrom(0, sd);
+    double s = randfrom((double) 0, (double)sd);
     double generated = 0;
 
     if ((((r + av) / 2) - s) < 0)
@@ -487,17 +494,37 @@ int main()
    		snapSym[k]->tradeCountPercent = percentage;
    		totalTradesPredicted += percentage;
    		cumulativeTradePer.push_back(totalTradesPredicted);
-    	snapSym[k]->print();
+    	//snapSym[k]->print();
     }
+
+   	symbol* tradeDeltas[snapSym.size()];
+   	for (unsigned int i = 0; i < snapSym.size(); i++)
+   	{
+   		tradeDeltas[i] = new symbol();
+   		tradeDeltas[i]->wIssueSymbol = snapSym[i]->wIssueSymbol;
+   		tradeDeltas[i]->wTradePrice = snapSym[i]->prices[usableFiles-1];
+   		tradeDeltas[i]->wTradeCount = 0;
+   		tradeDeltas[i]->wTradeVolume = 0;
+   	}
+
+   	cout << setprecision(3);
 
    	for (int i = 0; i < totalTrades; i++)
    	{
    	    //long double temp = getRandom(0, totalTradesPredicted);
    	    long double temp  = DoubleRand();
    	    int pos = binarySearch(cumulativeTradePer, temp, 0, cumulativeTradePer.size());
-   	    cout << "Position:		" << pos << endl;
+   	    // debug which symbol index has been chosen as next sym
+   	    //   	    cout << "Position:		" << pos << endl;
    	    if (pos != -1)
-   	    	cout << "Dice rolled:		" << temp << "	corresponds to	" << snapSym[pos]->wIssueSymbol << endl;
+   	    {
+   	    	// debug
+   	    	//cout << "Dice rolled:		" << temp << "	corresponds to	" << tradeDeltas[pos]->wIssueSymbol << endl;
+   	    	tradeDeltas[pos]->wTradeCount++;
+   	    	tradeDeltas[pos]->wTradePrice += 0.01;
+   	    	tradeDeltas[pos]->wTradeVolume = randfrom(1, 10000);
+   	    	cout << tradeDeltas[pos]->wIssueSymbol << ", " << tradeDeltas[pos]->wTradePrice << ", " << tradeDeltas[pos]->wTradeCount << ", " << tradeDeltas[pos]->wTradeVolume << endl;
+   	    }
    	}
 
    	cout << "The total trades: 			" << totalTrades << endl;
