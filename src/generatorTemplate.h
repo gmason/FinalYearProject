@@ -23,12 +23,12 @@ class generatorTemplate {
 	public: std::vector<double> wTradeCount;
 	public: double avTrades;
 	public: double sdTrades;
-	public: std::vector<long double> tradeCountPercent;
+	public: long double tradeCountPercent;
 	public: double nextPrice;
 	public: int nextTrades;
 	public: void print();
 public:
-	generatorTemplate(string, std::vector<double>, std::vector<double>, double, double, double, std::vector<int>, std::vector<double>, double, double, std::vector<long double>, double, int);
+	generatorTemplate(string, std::vector<double>, std::vector<double>, double, double, double, std::vector<int>, std::vector<double>, double, double, long double, double, int);
 	generatorTemplate();
 	generatorTemplate(const generatorTemplate&);
 	generatorTemplate& operator =(const generatorTemplate& a);

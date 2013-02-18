@@ -323,9 +323,7 @@ int main()
 
     generatorTemplate* generatedSnapShot;
     vector<generatorTemplate*> snapSym;
-    vector<int> totalTrades;
-	for (int p = 0; p < usableFiles; p++)
-		totalTrades.push_back(0);
+    int totalTrades;
 
     for (unsigned int i = 0; i < symbolsToCompare.size(); i++)
     {
@@ -339,7 +337,7 @@ int main()
     	double percentPositive;
     	vector<int> tradeVolumes;
     	vector<double> tradeCounts;
-    	vector<long double> tradeCountPercent;
+    	long double tradeCountPercent;
     	double nextPriceChange;
     	double nextPrice;
     	bool upOrDown;
@@ -416,38 +414,21 @@ int main()
         snapSym.push_back(generatedSnapShot);
     }
 
+    totalTrades = 0;
     for (unsigned int j = 0; j < snapSym.size(); j++)
-    {
-    	snapSym[j]->print();
-    	for (int k = 0; k < usableFiles; k++){
-    		totalTrades[k] += snapSym[j]->wTradeCount[k];
-    	}
+    	totalTrades += snapSym[j]->nextTrades;
+
+
+    long double totalTradesPredicted = 0;
+   	for (unsigned int k = 0; k < snapSym.size(); k++){
+    	long double percentage = (long double) snapSym[k]->nextTrades / (long double) totalTrades;
+   		snapSym[k]->tradeCountPercent = percentage;
+   		totalTradesPredicted += percentage;
+    	snapSym[k]->print();
     }
 
-    // Debug trade count totals
-	//for (int j = 0; j < usableFiles; j++)
-	//	cout << "Total trades for day " << j << ": " <<  totalTrades[j] << endl;
-
-    // debugging var. Ensures all probabilities add to 1
-    vector<long double> counters;
-
-    for (int j = 0; j < usableFiles; j++)
-    {
-    	counters.push_back(0);
-    	for (unsigned int k = 0; k < snapSym.size(); k++){
-    		long double percentage = (long double) snapSym[k]->wTradeCount[j] / (long double) totalTrades[j];
-    		snapSym[k]->tradeCountPercent.push_back(percentage);
-    		counters[j] += percentage;
-    	}
-    }
-
-    long double entireTotal = 0;
-    for (int j = 0; j < usableFiles; j++)
-    {
-    	for (unsigned int k = 0; k < snapSym.size(); k++){
-    		entireTotal += snapSym[k]->tradeCountPercent[j];
-    	}
-    }
+   	cout << "The total trades: 			" << totalTrades << endl;
+   	cout << "Total Trades percentage:		" << totalTradesPredicted << endl;
 
 //    Debug for making sure all percentages add up to 1
 //    cout << "Big dirty total: " << entireTotal / usableFiles << endl;
