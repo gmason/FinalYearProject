@@ -211,7 +211,7 @@ int binarySearch(vector<long double> arr, long double value, int left, int right
 	while (left <= right) {
 		int middle = (left + right+1) / 2;
 		if (arr[middle] == value || (arr[middle] < value && arr[middle+1] > value) || arr[middle] == arr[left])
-			return middle-1;
+			return middle+1;
 		else if (arr[middle] > value)
 			right = middle - 1;
 		else
@@ -494,7 +494,7 @@ int main()
    		snapSym[k]->tradeCountPercent = percentage;
    		totalTradesPredicted += percentage;
    		cumulativeTradePer.push_back(totalTradesPredicted);
-    	//snapSym[k]->print();
+    	snapSym[k]->print();
     }
 
    	symbol* tradeDeltas[snapSym.size()];
