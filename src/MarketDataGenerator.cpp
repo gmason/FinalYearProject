@@ -494,7 +494,8 @@ int main()
    		snapSym[k]->tradeCountPercent = percentage;
    		totalTradesPredicted += percentage;
    		cumulativeTradePer.push_back(totalTradesPredicted);
-    	snapSym[k]->print();
+    	// DEBUG print out all details stored for each symbol
+   		//snapSym[k]->print();
     }
 
    	symbol* tradeDeltas[snapSym.size()];
@@ -505,9 +506,11 @@ int main()
    		tradeDeltas[i]->wTradePrice = snapSym[i]->prices[usableFiles-1];
    		tradeDeltas[i]->wTradeCount = 0;
    		tradeDeltas[i]->wTradeVolume = 0;
+   		cout << tradeDeltas[i]->wTradePrice << "		" << tradeDeltas[i]->wIssueSymbol << endl;
    	}
 
-   	cout << setprecision(3);
+    cout << fixed << showpoint;
+   	cout << setprecision(2);
 
    	for (int i = 0; i < totalTrades; i++)
    	{
@@ -523,12 +526,29 @@ int main()
    	    	tradeDeltas[pos]->wTradeCount++;
    	    	tradeDeltas[pos]->wTradePrice += 0.01;
    	    	tradeDeltas[pos]->wTradeVolume = randfrom(1, 10000);
-   	    	cout << tradeDeltas[pos]->wIssueSymbol << ", " << tradeDeltas[pos]->wTradePrice << ", " << tradeDeltas[pos]->wTradeCount << ", " << tradeDeltas[pos]->wTradeVolume << endl;
+   	    	//cout << tradeDeltas[pos]->wIssueSymbol << ", " << tradeDeltas[pos]->wTradePrice << ", " << tradeDeltas[pos]->wTradeCount << ", " << tradeDeltas[pos]->wTradeVolume << endl;
    	    }
    	}
+/*
+   	long double actualTotalTrades = 0;
+   	for (unsigned int i = 0; i < snapSym.size(); i++)
+   		actualTotalTrades += tradeDeltas[i]->wTradeCount;
 
-   	cout << "The total trades: 			" << totalTrades << endl;
-   	cout << "Total Trades percentage:		" << totalTradesPredicted << endl;
+   	ofstream diagnosticsFile;
+   	diagnosticsFile.open("/Users/gtgmason/Documents/workspace/MarketDataGeneratorQUB/MarketDataGenerator/Debug/results/diag.txt");
 
+   	diagnosticsFile << setprecision(10);
+   	diagnosticsFile << "Symbol		Trades		Generated %		Historical %" << endl;
+
+   	for (unsigned int i = 0; i < snapSym.size(); i++)
+   	{
+   		long double testi = tradeDeltas[i]->wTradeCount / actualTotalTrades;
+   		diagnosticsFile << tradeDeltas[i]->wIssueSymbol << "		" << tradeDeltas[i]->wTradeCount << "		" << testi << "		" << snapSym[i]->tradeCountPercent << endl;
+   	}
+
+   	diagnosticsFile << "The total trades: 			" << (int)actualTotalTrades << endl;
+   	diagnosticsFile << "Total Trades percentage:		" << totalTradesPredicted << endl;
+   	diagnosticsFile.close();
+*/
     return 0;
 }
