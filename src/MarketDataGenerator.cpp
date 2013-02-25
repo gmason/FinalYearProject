@@ -99,7 +99,7 @@ long double getRandom(long double min, long double max)
   return random();
 }
 
-double DoubleRand() {
+double doubleRand() {
   typedef unsigned long long uint64;
   uint64 ret=0;
   for(int i=0;i<13;i++)ret|=((uint64)(rand()%16)<<i*4);
@@ -255,6 +255,62 @@ double valueGenerator(vector<double> &values, int size, double sd, double av, do
     	generated = ((r + av) / 2) - s;
 
     return generated;
+}
+
+int volumeGenerator(int min, int max, vector<int> volumes)
+{
+	int volume, total;
+	double average = 0;
+
+	total = 0;
+	for (int i = 0; i < volumes.size(); i++)
+		total += volumes[i];
+
+	average = total / volumes.size();
+
+	double x = 0, y = 0, z = 0;
+
+	x = randfrom((double) min, average);
+	y = randfrom(average, (double) max);
+
+	z = (x + y) / 2;
+
+	volume = int (z);
+
+	return volume;
+}
+
+double priceGenerator(double price, double targetPrice, long double probability, int tradesRemaining, int totalTrades)
+{
+	double nextPrice = 0;
+	double min = 0.01;
+	double max = 0.10;
+	double change = randfrom(min, max);
+
+
+	if (((probability * tradesRemaining) < 0.05 * (probability * totalTrades)) || (probability * totalTrades) < 15)
+	{
+		if (price > targetPrice && price - change > 0)
+			nextPrice = price - change;
+		else
+			nextPrice = price + change;
+	}
+	else
+	{
+		double positive = 0;
+		if (targetPrice < price)
+			positive = 0.25;
+		else
+			positive = 0.50;
+
+		double upOrDown = doubleRand();
+		if (upOrDown >= positive && price - change > 0)
+			nextPrice = price - change;
+		else
+			nextPrice = price + change;
+	}
+
+	return nextPrice;
 }
 
 double lowValue(vector<double> &values, int size)
@@ -466,7 +522,22 @@ int main()
     					double nextTradeCount = valueGenerator(tradeCounts, usableFiles, sdTradeCount, avTradeCount, highestTradeCount, lowestTradeCount);
     					int nextTrades = (int) nextTradeCount;
 
-        		        generatedSnapShot = new generatorTemplate(wIssueSymbol, prices, priceChanges, avPriceChange, sdPriceChange, percentPositive, tradeVolumes, tradeCounts, avTradeCount, sdTradeCount, tradeCountPercent, nextPrice, nextTrades);
+    					int minVol = 0;
+    					int maxVol = 0;
+    					for (int p = 0; p < usableFiles; p++)
+    					{
+    						if (p == 0)
+    						{
+    							minVol = tradeVolumes[p];
+    							maxVol = tradeVolumes[p];
+    						}
+    						else if (tradeVolumes[p] < minVol)
+    							minVol = tradeVolumes[p];
+    						else if (tradeVolumes[p] > maxVol)
+    							maxVol = tradeVolumes[p];
+    					}
+
+        		        generatedSnapShot = new generatorTemplate(wIssueSymbol, prices, priceChanges, avPriceChange, sdPriceChange, percentPositive, tradeVolumes, minVol, maxVol, tradeCounts, avTradeCount, sdTradeCount, tradeCountPercent, nextPrice, nextTrades);
     				}
     				break;
     			}
@@ -488,6 +559,10 @@ int main()
     	cumulativeTrades.push_back(totalTrades);
     }
 
+   	ofstream symbolDetails;
+   	string symDetailsFile = "/Users/gtgmason/Documents/workspace/MarketDataGeneratorQUB/MarketDataGenerator/Debug/results/symbolDetails.txt";
+   	symbolDetails.open(symDetailsFile.c_str());
+
     long double totalTradesPredicted = 0;
    	for (unsigned int k = 0; k < snapSym.size(); k++){
     	long double percentage = (long double) snapSym[k]->nextTrades / (long double) totalTrades;
@@ -495,7 +570,7 @@ int main()
    		totalTradesPredicted += percentage;
    		cumulativeTradePer.push_back(totalTradesPredicted);
     	// DEBUG print out all details stored for each symbol
-   		//snapSym[k]->print();
+   		snapSym[k]->print(symDetailsFile);
     }
 
    	symbol* tradeDeltas[snapSym.size()];
@@ -506,7 +581,7 @@ int main()
    		tradeDeltas[i]->wTradePrice = snapSym[i]->prices[usableFiles-1];
    		tradeDeltas[i]->wTradeCount = 0;
    		tradeDeltas[i]->wTradeVolume = 0;
-   		cout << tradeDeltas[i]->wTradePrice << "		" << tradeDeltas[i]->wIssueSymbol << endl;
+   		// cout << tradeDeltas[i]->wTradePrice << "		" << tradeDeltas[i]->wIssueSymbol << endl;
    	}
 
     cout << fixed << showpoint;
@@ -515,7 +590,7 @@ int main()
    	for (int i = 0; i < totalTrades; i++)
    	{
    	    //long double temp = getRandom(0, totalTradesPredicted);
-   	    long double temp  = DoubleRand();
+   	    long double temp  = doubleRand();
    	    int pos = binarySearch(cumulativeTradePer, temp, 0, cumulativeTradePer.size());
    	    // debug which symbol index has been chosen as next sym
    	    //   	    cout << "Position:		" << pos << endl;
@@ -524,12 +599,13 @@ int main()
    	    	// debug
    	    	//cout << "Dice rolled:		" << temp << "	corresponds to	" << tradeDeltas[pos]->wIssueSymbol << endl;
    	    	tradeDeltas[pos]->wTradeCount++;
-   	    	tradeDeltas[pos]->wTradePrice += 0.01;
-   	    	tradeDeltas[pos]->wTradeVolume = randfrom(1, 10000);
-   	    	//cout << tradeDeltas[pos]->wIssueSymbol << ", " << tradeDeltas[pos]->wTradePrice << ", " << tradeDeltas[pos]->wTradeCount << ", " << tradeDeltas[pos]->wTradeVolume << endl;
+   	    	tradeDeltas[pos]->wTradePrice = priceGenerator(tradeDeltas[pos]->wTradePrice, snapSym[pos]->nextPrice, snapSym[pos]->tradeCountPercent, totalTrades-i, totalTrades);
+   	    	//tradeDeltas[pos]->wTradeVolume = randfrom(1, 10000);
+   	    	tradeDeltas[pos]->wTradeVolume = volumeGenerator(snapSym[pos]->minVol, snapSym[pos]->maxVol, snapSym[pos]->wTradeVolume);
+   	    	cout << tradeDeltas[pos]->wIssueSymbol << "	" << tradeDeltas[pos]->wTradePrice << "	" << tradeDeltas[pos]->wTradeCount << "	" << tradeDeltas[pos]->wTradeVolume << endl;
    	    }
    	}
-/*
+
    	long double actualTotalTrades = 0;
    	for (unsigned int i = 0; i < snapSym.size(); i++)
    		actualTotalTrades += tradeDeltas[i]->wTradeCount;
@@ -549,6 +625,6 @@ int main()
    	diagnosticsFile << "The total trades: 			" << (int)actualTotalTrades << endl;
    	diagnosticsFile << "Total Trades percentage:		" << totalTradesPredicted << endl;
    	diagnosticsFile.close();
-*/
+
     return 0;
 }

@@ -7,10 +7,12 @@
 
 #include "generatorTemplate.h"
 #include "iostream.h"
+#include <fstream>
+#include <sstream>
 #include <iomanip>
 using namespace std;
 
-generatorTemplate::generatorTemplate(string _wIssueSymbol, vector<double> _prices, vector<double> _priceChanges, double _avPriceChange, double _sdPriceChange, double _percentPositive, std::vector<int> _wTradeVolume, std::vector<double> _wTradeCount,  double _avTrades, double _sdTrades, long double _tradeCountPercent, double _nextPrice, int _nextTrades) {
+generatorTemplate::generatorTemplate(string _wIssueSymbol, vector<double> _prices, vector<double> _priceChanges, double _avPriceChange, double _sdPriceChange, double _percentPositive, std::vector<int> _wTradeVolume, int _minVol, int _maxVol, std::vector<double> _wTradeCount,  double _avTrades, double _sdTrades, long double _tradeCountPercent, double _nextPrice, int _nextTrades) {
 	wIssueSymbol = _wIssueSymbol;
 	prices = _prices;
 	priceChanges = _priceChanges;
@@ -18,6 +20,8 @@ generatorTemplate::generatorTemplate(string _wIssueSymbol, vector<double> _price
 	sdPriceChange = _sdPriceChange;
 	percentPositive = _percentPositive;
 	wTradeVolume = _wTradeVolume;
+	minVol = _minVol;
+	maxVol = _maxVol;
 	wTradeCount = _wTradeCount;
 	avTrades = _avTrades;
 	sdTrades = _sdTrades;
@@ -46,56 +50,62 @@ generatorTemplate::generatorTemplate() {
 	nextTrades = 0;
 }
 
-
-
-void generatorTemplate::print()
+void generatorTemplate::print(string filepath)
 {
-    cout << fixed << showpoint;
-	cout << setprecision(2);
-	cout << "Symbol: 		" << this->wIssueSymbol << endl;
-	cout << "Day:			";
+	ofstream symbolDetails;
+   	symbolDetails.open(filepath.c_str(), ios::out | ios::app);
+
+   	symbolDetails << fixed << showpoint;
+   	symbolDetails << setprecision(2);
+   	symbolDetails << "Symbol: 		" << this->wIssueSymbol << endl;
+   	symbolDetails << "Day:			";
 	for (unsigned int i = 0; i < prices.size(); i++)
 	{
 		if (i == prices.size()-1)
-			cout <<  i+1 << "			" << "Predicted";
+			symbolDetails <<  i+1 << "			" << "Predicted";
 		else
-			cout << i+1 << "		";
+			symbolDetails << i+1 << "		";
 	}
 
-	cout << endl << "Prices: 		";
+	symbolDetails << endl << "Prices: 		";
 
 	for (unsigned int i = 0; i < prices.size(); i++)
-		cout  << this->prices[i] << "		";
+		symbolDetails  << this->prices[i] << "		";
 
-	cout << "	" << this->nextPrice;
+	symbolDetails << "	" << this->nextPrice;
 
-    cout << endl << "Price Changes:				";
+	symbolDetails << endl << "Price Changes:				";
 
 	for (unsigned int i = 0; i < prices.size()-1; i++)
-		cout << this->priceChanges[i] << "		";
+		symbolDetails << this->priceChanges[i] << "		";
 
-    cout << endl << "Av Price Change:	" << this->avPriceChange << endl;
-    cout << "% positive: 		" << this->percentPositive << endl;
-    cout << "Sd Price Change:	" << this->sdPriceChange << endl;
+	symbolDetails << endl << "Av Price Change:	" << this->avPriceChange << endl;
+	symbolDetails << "% positive: 		" << this->percentPositive << endl;
+	symbolDetails << "Sd Price Change:	" << this->sdPriceChange << endl;
 
-	cout << "Trade Counts:		";
+	symbolDetails << "Trade Counts:		";
 
 	for (unsigned int i = 0; i < wTradeCount.size(); i++)
-		cout << (int) this->wTradeCount[i] << "		";
+		symbolDetails << (int) this->wTradeCount[i] << "		";
 
-	cout << "	" << this->nextTrades;
+	symbolDetails << "	" << this->nextTrades;
 
-    cout << endl << "Av Trades: 		" << this->avTrades << endl;
-    cout << "Sd Trades:		" << this->sdTrades;
+	symbolDetails << endl << "Av Trades: 		" << this->avTrades << endl;
+	symbolDetails << "Sd Trades:		" << this->sdTrades;
 
-    cout << endl << "Trade Volumes:		";
+	symbolDetails << endl << "Trade Volumes:		";
 
 	for (unsigned int i = 0; i < prices.size(); i++)
-		cout << this->wTradeVolume[i] << "		";
+		symbolDetails << this->wTradeVolume[i] << "		";
 
-	cout << setprecision(65);
-	cout << endl << "Trade Count %s:		" << this->tradeCountPercent << endl;
+	symbolDetails << endl << "Minimum Volume:	" << this->minVol;
+	symbolDetails << endl << "Maximum Volume:	" << this->maxVol;
 
-	cout << endl << endl << endl;
+	symbolDetails << setprecision(65);
+	symbolDetails << endl << "Trade Count %s:		" << this->tradeCountPercent << endl;
+
+	symbolDetails << endl << endl << endl;
+
+	symbolDetails.close();
 }
 

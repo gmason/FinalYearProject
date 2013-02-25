@@ -9,6 +9,9 @@
 #define GENERATORTEMPLATE_H_
 #include <string>
 #include <vector>
+#include "iostream.h"
+#include <fstream>
+#include <sstream>
 using std::string;
 using std::vector;
 
@@ -20,15 +23,17 @@ class generatorTemplate {
 	public: double sdPriceChange;
 	public: double percentPositive;
 	public: std::vector<int> wTradeVolume;
+	public: int minVol;
+	public: int maxVol;
 	public: std::vector<double> wTradeCount;
 	public: double avTrades;
 	public: double sdTrades;
 	public: long double tradeCountPercent;
 	public: double nextPrice;
 	public: int nextTrades;
-	public: void print();
+	public: void print(string symbolDetails);
 public:
-	generatorTemplate(string, std::vector<double>, std::vector<double>, double, double, double, std::vector<int>, std::vector<double>, double, double, long double, double, int);
+	generatorTemplate(string, std::vector<double>, std::vector<double>, double, double, double, std::vector<int>, int, int, std::vector<double>, double, double, long double, double, int);
 	generatorTemplate();
 	generatorTemplate(const generatorTemplate&);
 	generatorTemplate& operator =(const generatorTemplate& a);
