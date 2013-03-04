@@ -280,20 +280,26 @@ int volumeGenerator(int min, int max, vector<int> volumes)
 	return volume;
 }
 
-double priceGenerator(double price, double targetPrice, long double probability, int tradesRemaining, int totalTrades)
+double priceGenerator(double price, double meanIncrements, double targetPrice, long double probability, int tradesRemaining, int totalTrades, int tradeCount, double sd)
 {
 	double nextPrice = 0;
 	double min = 0.01;
-	double max = 0.10;
+	double max;
+	if (sd < 0.25)
+		max = sd;
+	else
+		max = 0.25;
+
 	double change = randfrom(min, max);
 
+	double meanPrice = price + (meanIncrements * tradeCount);
 
 	if (((probability * tradesRemaining) < 0.05 * (probability * totalTrades)) || (probability * totalTrades) < 15)
 	{
 		if (price > targetPrice && price - change > 0)
-			nextPrice = price - change;
+			nextPrice = meanPrice - change;
 		else
-			nextPrice = price + change;
+			nextPrice = meanPrice + change;
 	}
 	else
 	{
@@ -305,9 +311,9 @@ double priceGenerator(double price, double targetPrice, long double probability,
 
 		double upOrDown = doubleRand();
 		if (upOrDown >= positive && price - change > 0)
-			nextPrice = price - change;
+			nextPrice = meanPrice - change;
 		else
-			nextPrice = price + change;
+			nextPrice = meanPrice + change;
 	}
 
 	return nextPrice;
@@ -574,6 +580,7 @@ int main()
     }
 
    	symbol* tradeDeltas[snapSym.size()];
+   	vector<double> meanIncrements;
    	for (unsigned int i = 0; i < snapSym.size(); i++)
    	{
    		tradeDeltas[i] = new symbol();
@@ -581,6 +588,8 @@ int main()
    		tradeDeltas[i]->wTradePrice = snapSym[i]->prices[usableFiles-1];
    		tradeDeltas[i]->wTradeCount = 0;
    		tradeDeltas[i]->wTradeVolume = 0;
+   		double meanInc = (snapSym[i]->nextPrice - tradeDeltas[i]->wTradePrice) / (snapSym[i]->tradeCountPercent * totalTrades);
+   		meanIncrements.push_back(meanInc);
    		// cout << tradeDeltas[i]->wTradePrice << "		" << tradeDeltas[i]->wIssueSymbol << endl;
    	}
 
@@ -607,7 +616,7 @@ int main()
    	    if (pos != -1)
    	    {
    	    	tradeDeltas[pos]->wTradeCount++;
-   	    	tradeDeltas[pos]->wTradePrice = priceGenerator(tradeDeltas[pos]->wTradePrice, snapSym[pos]->nextPrice, snapSym[pos]->tradeCountPercent, totalTrades-i, totalTrades);
+   	    	tradeDeltas[pos]->wTradePrice = priceGenerator(snapSym[pos]->prices[usableFiles-1], meanIncrements[pos], snapSym[pos]->nextPrice, snapSym[pos]->tradeCountPercent, totalTrades-i, totalTrades, tradeDeltas[pos]->wTradeCount, snapSym[pos]->sdPriceChange);
    	    	tradeDeltas[pos]->wTradeVolume = volumeGenerator(snapSym[pos]->minVol, snapSym[pos]->maxVol, snapSym[pos]->wTradeVolume);
    	    	tradesAndQuotes << tradeDeltas[pos]->wIssueSymbol << "		" << tradeDeltas[pos]->wTradePrice << "			" << tradeDeltas[pos]->wTradeCount << "			" << tradeDeltas[pos]->wTradeVolume << endl;
    	    }
