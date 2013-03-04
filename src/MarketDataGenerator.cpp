@@ -263,7 +263,7 @@ int volumeGenerator(int min, int max, vector<int> volumes)
 	double average = 0;
 
 	total = 0;
-	for (int i = 0; i < volumes.size(); i++)
+	for (unsigned int i = 0; i < volumes.size(); i++)
 		total += volumes[i];
 
 	average = total / volumes.size();
@@ -587,24 +587,34 @@ int main()
     cout << fixed << showpoint;
    	cout << setprecision(2);
 
+   	ofstream tradesAndQuotes;
+   	string tradesAndQuotesFile = "/Users/gtgmason/Documents/workspace/MarketDataGeneratorQUB/MarketDataGenerator/Debug/results/tradesAndQuotes.txt";
+   	tradesAndQuotes.open(tradesAndQuotesFile.c_str());
+   	tradesAndQuotes << "Symbol		Trade Price		Trade Count		Trade Volume" << endl << endl;
+
+   	ofstream dice;
+   	string diceFile = "/Users/gtgmason/Documents/workspace/MarketDataGeneratorQUB/MarketDataGenerator/Debug/results/dice.txt";
+   	dice.open(diceFile.c_str());
+
    	for (int i = 0; i < totalTrades; i++)
    	{
    	    //long double temp = getRandom(0, totalTradesPredicted);
    	    long double temp  = doubleRand();
    	    int pos = binarySearch(cumulativeTradePer, temp, 0, cumulativeTradePer.size());
-   	    // debug which symbol index has been chosen as next sym
-   	    //   	    cout << "Position:		" << pos << endl;
+
+   	    dice << "Dice rolled:		" << temp << "	corresponds to pos:		" << pos << ",	symbol:		" << tradeDeltas[pos]->wIssueSymbol << endl;
+
    	    if (pos != -1)
    	    {
-   	    	// debug
-   	    	//cout << "Dice rolled:		" << temp << "	corresponds to	" << tradeDeltas[pos]->wIssueSymbol << endl;
    	    	tradeDeltas[pos]->wTradeCount++;
    	    	tradeDeltas[pos]->wTradePrice = priceGenerator(tradeDeltas[pos]->wTradePrice, snapSym[pos]->nextPrice, snapSym[pos]->tradeCountPercent, totalTrades-i, totalTrades);
-   	    	//tradeDeltas[pos]->wTradeVolume = randfrom(1, 10000);
    	    	tradeDeltas[pos]->wTradeVolume = volumeGenerator(snapSym[pos]->minVol, snapSym[pos]->maxVol, snapSym[pos]->wTradeVolume);
-   	    	cout << tradeDeltas[pos]->wIssueSymbol << "	" << tradeDeltas[pos]->wTradePrice << "	" << tradeDeltas[pos]->wTradeCount << "	" << tradeDeltas[pos]->wTradeVolume << endl;
+   	    	tradesAndQuotes << tradeDeltas[pos]->wIssueSymbol << "		" << tradeDeltas[pos]->wTradePrice << "			" << tradeDeltas[pos]->wTradeCount << "			" << tradeDeltas[pos]->wTradeVolume << endl;
    	    }
    	}
+
+   	dice.close();
+   	tradesAndQuotes.close();
 
    	long double actualTotalTrades = 0;
    	for (unsigned int i = 0; i < snapSym.size(); i++)
@@ -613,13 +623,13 @@ int main()
    	ofstream diagnosticsFile;
    	diagnosticsFile.open("/Users/gtgmason/Documents/workspace/MarketDataGeneratorQUB/MarketDataGenerator/Debug/results/diag.txt");
 
-   	diagnosticsFile << setprecision(10);
-   	diagnosticsFile << "Symbol		Trades		Generated %		Historical %" << endl;
+   	diagnosticsFile << setprecision(20);
+   	diagnosticsFile << "Symbol		Generated		Generated %				Historical Trades			Historical %" << endl;
 
    	for (unsigned int i = 0; i < snapSym.size(); i++)
    	{
    		long double testi = tradeDeltas[i]->wTradeCount / actualTotalTrades;
-   		diagnosticsFile << tradeDeltas[i]->wIssueSymbol << "		" << tradeDeltas[i]->wTradeCount << "		" << testi << "		" << snapSym[i]->tradeCountPercent << endl;
+   		diagnosticsFile << tradeDeltas[i]->wIssueSymbol << "		" << tradeDeltas[i]->wTradeCount << "			" << testi << "		" << snapSym[i]->avTrades << "		" << snapSym[i]->tradeCountPercent << endl;
    	}
 
    	diagnosticsFile << "The total trades: 			" << (int)actualTotalTrades << endl;
