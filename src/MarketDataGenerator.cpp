@@ -5,7 +5,6 @@
 // Copyright   : 
 // Description : Base class of marketDataGenerator project, Ansi-style
 //============================================================================
-
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -27,7 +26,6 @@
 #include "boost/generator_iterator.hpp"
 #include <sys/time.h>
 using namespace std;
-
 
 static vector<string> symbols;
 static vector<string> symbolsToCompare;
@@ -280,6 +278,65 @@ int volumeGenerator(int min, int max, vector<int> volumes)
 	return volume;
 }
 
+double getDecimalPart(double number){
+   int Integer = (int) number;
+   double temp = number - (double)Integer;
+   return temp;
+}
+
+vector<double> timeGenerator(int totalTrades, int openPercent, int closePercent)//, double thirdPeak, int thirdPeakPercent)
+{
+	vector<double> times;
+	int openTrades = totalTrades / openPercent;
+	int closeTrades = totalTrades / closePercent;
+	int middleTrades = totalTrades - (openTrades + closeTrades);
+
+	long double oldPercentDone = 0;
+	for (int i = 0 ; i < openTrades ; i++)
+	{
+	  const long double newPercentDone = static_cast<long double>(100*i/openTrades);
+	  if (oldPercentDone != newPercentDone)
+		  oldPercentDone = newPercentDone;
+
+	  times.push_back(9.30+(oldPercentDone/1000000 * 60));
+//	  cout << "DEBUG:	" << (oldPercentDone/1000000 * 60) << endl;
+//	  cout << setprecision(4) << times[i] << endl;
+	}
+
+	oldPercentDone = 0;
+	double time = 9.31;
+	for (int i = 0 ; i < middleTrades ; i++)
+	{
+	  const long double newPercentDone = static_cast<long double>(100*i/middleTrades);
+	  if (oldPercentDone != newPercentDone)
+	  {
+		  oldPercentDone = newPercentDone;
+		  time += 0.038;
+		  double minCheck = getDecimalPart(time);
+		  if (minCheck > 0.59)
+		  {
+			  time += 1;
+			  time -= 0.59;
+		  }
+	  }
+
+	  times.push_back(time);
+	}
+
+	oldPercentDone = 0;
+	for (int i = 0 ; i < closeTrades ; i++)
+	{
+	  const long double newPercentDone = static_cast<long double>(100*i/closeTrades);
+	  if (oldPercentDone != newPercentDone)
+		  oldPercentDone = newPercentDone;
+
+	  times.push_back(15.59+(oldPercentDone/1000000 * 60));
+	}
+
+	cout << times.size() << endl;
+	return times;
+}
+
 double priceGenerator(double price, double meanIncrements, double targetPrice, long double probability, int tradesRemaining, int totalTrades, int tradeCount, double sd)
 {
 	double nextPrice = 0;
@@ -291,7 +348,6 @@ double priceGenerator(double price, double meanIncrements, double targetPrice, l
 		max = 0.25;
 
 	double change = randfrom(min, max);
-
 	double meanPrice = price + (meanIncrements * tradeCount);
 
 	if (((probability * tradesRemaining) < 0.05 * (probability * totalTrades)) || (probability * totalTrades) < 15)
@@ -605,6 +661,8 @@ int main()
    	string diceFile = "/Users/gtgmason/Documents/workspace/MarketDataGeneratorQUB/MarketDataGenerator/Debug/results/dice.txt";
    	dice.open(diceFile.c_str());
 
+   	vector<double> times = timeGenerator(totalTrades, 10, 10);//, 12.00, 10);
+
    	for (int i = 0; i < totalTrades; i++)
    	{
    	    //long double temp = getRandom(0, totalTradesPredicted);
@@ -618,9 +676,11 @@ int main()
    	    	tradeDeltas[pos]->wTradeCount++;
    	    	tradeDeltas[pos]->wTradePrice = priceGenerator(snapSym[pos]->prices[usableFiles-1], meanIncrements[pos], snapSym[pos]->nextPrice, snapSym[pos]->tradeCountPercent, totalTrades-i, totalTrades, tradeDeltas[pos]->wTradeCount, snapSym[pos]->sdPriceChange);
    	    	tradeDeltas[pos]->wTradeVolume = volumeGenerator(snapSym[pos]->minVol, snapSym[pos]->maxVol, snapSym[pos]->wTradeVolume);
-   	    	tradesAndQuotes << tradeDeltas[pos]->wIssueSymbol << "		" << tradeDeltas[pos]->wTradePrice << "			" << tradeDeltas[pos]->wTradeCount << "			" << tradeDeltas[pos]->wTradeVolume << endl;
+   	    	tradesAndQuotes << tradeDeltas[pos]->wIssueSymbol << "		" << tradeDeltas[pos]->wTradePrice << "			" << tradeDeltas[pos]->wTradeCount << "			" << tradeDeltas[pos]->wTradeVolume << "		" <<  times[i] << endl;
    	    }
    	}
+
+   	cout << totalTrades << endl;
 
    	dice.close();
    	tradesAndQuotes.close();
