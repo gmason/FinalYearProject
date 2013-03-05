@@ -307,18 +307,34 @@ vector<double> timeGenerator(int totalTrades, int openPercent, int closePercent)
 	double time = 9.31;
 	for (int i = 0 ; i < middleTrades ; i++)
 	{
-	  const long double newPercentDone = static_cast<long double>(100*i/middleTrades);
+	  //const long double newPercentDone = static_cast<long double>(100*i/middleTrades);
+	  const long double newPercentDone = static_cast<long double>(23279*i/middleTrades);
 	  if (oldPercentDone != newPercentDone)
 	  {
 		  oldPercentDone = newPercentDone;
-		  time += 0.038;
-		  double minCheck = getDecimalPart(time);
-		  if (minCheck > 0.59)
+		  time += 0.0001;
+
+		  double secCheck = getDecimalPart(time*100);
+		  if (secCheck > 0.59)
 		  {
+			  time -= 0.0060;
+			  time += 0.01;
+		  }
+
+		  double minCheck = getDecimalPart(time);
+		  if (minCheck == 0.5959)
+		  {
+			  time -= 0.6060;
 			  time += 1;
-			  time -= 0.59;
+		  }
+		  else if (minCheck > 0.5959)
+		  {
+			  time -= 0.60;
+			  time += 1;
 		  }
 	  }
+
+
 
 	  times.push_back(time);
 	}
@@ -333,7 +349,6 @@ vector<double> timeGenerator(int totalTrades, int openPercent, int closePercent)
 	  times.push_back(15.59+(oldPercentDone/1000000 * 60));
 	}
 
-	cout << times.size() << endl;
 	return times;
 }
 
@@ -679,8 +694,6 @@ int main()
    	    	tradesAndQuotes << tradeDeltas[pos]->wIssueSymbol << "		" << tradeDeltas[pos]->wTradePrice << "			" << tradeDeltas[pos]->wTradeCount << "			" << tradeDeltas[pos]->wTradeVolume << "		" <<  times[i] << endl;
    	    }
    	}
-
-   	cout << totalTrades << endl;
 
    	dice.close();
    	tradesAndQuotes.close();
