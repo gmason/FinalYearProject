@@ -19,6 +19,7 @@
 #include <cmath>
 #include "symbol.h"
 #include "generatorTemplate.h"
+#include "timetype.h"
 #include <ctime>
 #include <map>
 #include <stdlib.h>
@@ -275,9 +276,9 @@ double getDecimalPart(double number){
    return temp;
 }
 
-vector<double> timeGenerator(int totalTrades, int openPercent, int closePercent)//, double thirdPeak, int thirdPeakPercent)
+vector<timetype> timeGenerator(int totalTrades, int openPercent, int closePercent)//, double thirdPeak, int thirdPeakPercent)
 {
-	vector<double> times;
+	vector<timetype> times;
 	int openTrades = totalTrades / openPercent;
 	int closeTrades = totalTrades / closePercent;
 	int middleTrades = totalTrades - (openTrades + closeTrades);
@@ -289,45 +290,21 @@ vector<double> timeGenerator(int totalTrades, int openPercent, int closePercent)
 	  if (oldPercentDone != newPercentDone)
 		  oldPercentDone = newPercentDone;
 
-	  times.push_back(9.30+(oldPercentDone/1000000 * 60));
-//	  cout << "DEBUG:	" << (oldPercentDone/1000000 * 60) << endl;
-//	  cout << setprecision(4) << times[i] << endl;
+	  timetype timeVar = timetype(9, 30, (oldPercentDone/100 * 60));
+	  times.push_back(timeVar);
 	}
 
 	oldPercentDone = 0;
-	double time = 9.31;
+	timetype currentTime = timetype(9, 31, 0);
 	for (int i = 0 ; i < middleTrades ; i++)
 	{
-	  //const long double newPercentDone = static_cast<long double>(100*i/middleTrades);
-	  const long double newPercentDone = static_cast<long double>(23279*i/middleTrades);
+	  const long double newPercentDone = static_cast<long double>(23279*i/middleTrades); //23279 is the number of seconds in the middle
 	  if (oldPercentDone != newPercentDone)
 	  {
 		  oldPercentDone = newPercentDone;
-		  time += 0.0001;
-
-		  double secCheck = getDecimalPart(time*100);
-		  if (secCheck > 0.59)
-		  {
-			  time -= 0.0060;
-			  time += 0.01;
-		  }
-
-		  double minCheck = getDecimalPart(time);
-		  if (minCheck == 0.5959)
-		  {
-			  time -= 0.6060;
-			  time += 1;
-		  }
-		  else if (minCheck > 0.5959)
-		  {
-			  time -= 0.60;
-			  time += 1;
-		  }
+		  currentTime.add();
 	  }
-
-
-
-	  times.push_back(time);
+	  times.push_back(currentTime);
 	}
 
 	oldPercentDone = 0;
@@ -337,7 +314,8 @@ vector<double> timeGenerator(int totalTrades, int openPercent, int closePercent)
 	  if (oldPercentDone != newPercentDone)
 		  oldPercentDone = newPercentDone;
 
-	  times.push_back(15.59+(oldPercentDone/1000000 * 60));
+	  timetype timeVar = timetype(15, 59, (oldPercentDone/100 * 60));
+	  times.push_back(timeVar);
 	}
 
 	return times;
@@ -739,7 +717,8 @@ int main()
    	string diceFile = "results/dice.txt";
    	dice.open(diceFile.c_str());
 
-   	vector<double> times = timeGenerator(totalTrades, 10, 10);//, 12.00, 10);
+   	vector<timetype> times;
+   	times = timeGenerator(totalTrades, 10, 10);//, 12.00, 10);
 
    	for (int i = 0; i < totalTrades; i++)
    	{
@@ -754,7 +733,8 @@ int main()
    	    	tradeDeltas[pos]->wTradeCount++;
    	    	tradeDeltas[pos]->wTradePrice = priceGenerator(snapSym[pos]->prices[usableFiles-1], meanIncrements[pos], snapSym[pos]->nextPrice, snapSym[pos]->tradeCountPercent, totalTrades-i, totalTrades, tradeDeltas[pos]->wTradeCount, snapSym[pos]->sdPriceChange);
    	    	tradeDeltas[pos]->wTradeVolume = volumeGenerator(snapSym[pos]->minVol, snapSym[pos]->maxVol, snapSym[pos]->wTradeVolume, snapSym[pos]->avVol);
-   	    	tradesAndQuotes << tradeDeltas[pos]->wIssueSymbol << "		" << tradeDeltas[pos]->wTradePrice << "			" << tradeDeltas[pos]->wTradeCount << "			" << tradeDeltas[pos]->wTradeVolume << "		" <<  times[i] << endl;
+   	    	string temp = times[i].print();
+   	    	tradesAndQuotes << tradeDeltas[pos]->wIssueSymbol << "		" << tradeDeltas[pos]->wTradePrice << "			" << tradeDeltas[pos]->wTradeCount << "			" << tradeDeltas[pos]->wTradeVolume << "		" << temp << endl;
    	    }
    	}
 

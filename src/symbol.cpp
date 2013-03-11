@@ -7,7 +7,11 @@
 // symbol descriptor
 
 #include "symbol.h"
-#include "iostream.h"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+using namespace std;
 
 symbol::symbol(string _wIssueSymbol, double _wTradePrice, int _wTradeVolume, int _wTradeCount) {
 	wIssueSymbol = _wIssueSymbol;
