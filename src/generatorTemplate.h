@@ -25,6 +25,7 @@ class generatorTemplate {
 	public: std::vector<int> wTradeVolume;
 	public: int minVol;
 	public: int maxVol;
+	public: int avVol;
 	public: std::vector<double> wTradeCount;
 	public: double avTrades;
 	public: double sdTrades;
@@ -32,8 +33,9 @@ class generatorTemplate {
 	public: double nextPrice;
 	public: int nextTrades;
 	public: void print(string symbolDetails);
+	public: void printVolumes(string symbolDetails);
 public:
-	generatorTemplate(string, std::vector<double>, std::vector<double>, double, double, double, std::vector<int>, int, int, std::vector<double>, double, double, long double, double, int);
+	generatorTemplate(string, std::vector<double>, std::vector<double>, double, double, double, std::vector<int>, int, int, int, std::vector<double>, double, double, long double, double, int);
 	generatorTemplate();
 	generatorTemplate(const generatorTemplate&);
 	generatorTemplate& operator =(const generatorTemplate& a);

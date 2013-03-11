@@ -255,26 +255,17 @@ double valueGenerator(vector<double> &values, int size, double sd, double av, do
     return generated;
 }
 
-int volumeGenerator(int min, int max, vector<int> volumes)
+int volumeGenerator(int min, int max, vector<int> volumes, int average)
 {
-	int volume, total;
-	double average = 0;
-
-	total = 0;
-	for (unsigned int i = 0; i < volumes.size(); i++)
-		total += volumes[i];
-
-	average = total / volumes.size();
-
+	int volume;
 	double x = 0, y = 0, z = 0;
 
-	x = randfrom((double) min, average);
-	y = randfrom(average, (double) max);
+	x = randfrom((double) min, (double)average);
+	y = randfrom((double)average, (double) max);
 
 	z = (x + y) / 2;
 
 	volume = int (z);
-
 	return volume;
 }
 
@@ -420,6 +411,25 @@ double avCalculator(vector<double> &values, int size)
 
 	double average = runningTotal / (double) size;
 	return average;
+}
+
+int stringToInt(string x)
+{
+	stringstream convert(x);
+	int xInt = 0;
+	if ( !(convert >> xInt) )
+		xInt = 0;
+
+	return xInt;
+}
+
+double string_to_double( const std::string& s )
+{
+  std::istringstream i(s);
+  double x;
+  if (!(i >> x))
+    return 0;
+  return x;
 }
 
 double sdCalculator(vector<double> &values, double average, int size)
@@ -601,8 +611,10 @@ int main()
 
     					int minVol = 0;
     					int maxVol = 0;
+    					int avVol = 0;
     					for (int p = 0; p < usableFiles; p++)
     					{
+    						avVol += tradeVolumes[p];
     						if (p == 0)
     						{
     							minVol = tradeVolumes[p];
@@ -614,7 +626,9 @@ int main()
     							maxVol = tradeVolumes[p];
     					}
 
-        		        generatedSnapShot = new generatorTemplate(wIssueSymbol, prices, priceChanges, avPriceChange, sdPriceChange, percentPositive, tradeVolumes, minVol, maxVol, tradeCounts, avTradeCount, sdTradeCount, tradeCountPercent, nextPrice, nextTrades);
+    					avVol = avVol / usableFiles;
+
+        		        generatedSnapShot = new generatorTemplate(wIssueSymbol, prices, priceChanges, avPriceChange, sdPriceChange, percentPositive, tradeVolumes, minVol, maxVol, avVol, tradeCounts, avTradeCount, sdTradeCount, tradeCountPercent, nextPrice, nextTrades);
     				}
     				break;
     			}
@@ -637,7 +651,7 @@ int main()
     }
 
    	ofstream symbolDetails;
-   	string symDetailsFile = "/Users/gtgmason/Documents/workspace/MarketDataGeneratorQUB/MarketDataGenerator/Debug/results/symbolDetails.txt";
+   	string symDetailsFile = "results/symbolDetails.txt";
    	symbolDetails.open(symDetailsFile.c_str());
 
     long double totalTradesPredicted = 0;
@@ -667,13 +681,62 @@ int main()
     cout << fixed << showpoint;
    	cout << setprecision(2);
 
+   	ofstream volumes;
+   	string volumeFile = "results/volumes.csv";
+   	volumes.open(volumeFile.c_str());
+
+   	for (unsigned int k = 0; k < snapSym.size(); k++)
+   		snapSym[k]->printVolumes(volumeFile);
+
+   	volumes.close();
+
+   	string type;
+   	cout << "Pausing execution.. Please edit volumes.csv (file save as > windows csv in excel) now if you'd like to override values, or type anything to continue..." << endl;
+   	cin >> type;
+
+   	vector<int> readVolumes;
+   	ifstream volumesFile("results/volumes.csv");
+    string token, line;
+    stringstream iss;
+    int count = 0;
+    while ( getline(volumesFile, line) )
+    {
+        iss << line;
+        int counter = 0;
+        int days = 0;
+        string sym = "", av ="";
+        while ( getline(iss, token, ',') )
+        {
+        	if (counter < 1)
+        		sym = token;
+        	else if (counter == 1)
+        		days = stringToInt(token);
+        	else if (counter == (days + 2))
+        		av = token;
+
+            counter++;
+        }
+
+
+        if (snapSym[count]->avVol != stringToInt(av))
+        {
+        	snapSym[count]->avVol = stringToInt(av);
+        	cout << "Changed " << sym << " from " << snapSym[count]->avVol << " to " << av << endl;
+        }
+
+        //cout << sym << ",		" << av << endl;
+        //cout << snapSym[count]->wIssueSymbol << ",		" << snapSym[count]->avVol << endl << endl;
+        iss.clear();
+        count++;
+    }
+
    	ofstream tradesAndQuotes;
-   	string tradesAndQuotesFile = "/Users/gtgmason/Documents/workspace/MarketDataGeneratorQUB/MarketDataGenerator/Debug/results/tradesAndQuotes.txt";
+   	string tradesAndQuotesFile = "results/tradesAndQuotes.txt";
    	tradesAndQuotes.open(tradesAndQuotesFile.c_str());
    	tradesAndQuotes << "Symbol		Trade Price		Trade Count		Trade Volume" << endl << endl;
 
    	ofstream dice;
-   	string diceFile = "/Users/gtgmason/Documents/workspace/MarketDataGeneratorQUB/MarketDataGenerator/Debug/results/dice.txt";
+   	string diceFile = "results/dice.txt";
    	dice.open(diceFile.c_str());
 
    	vector<double> times = timeGenerator(totalTrades, 10, 10);//, 12.00, 10);
@@ -690,7 +753,7 @@ int main()
    	    {
    	    	tradeDeltas[pos]->wTradeCount++;
    	    	tradeDeltas[pos]->wTradePrice = priceGenerator(snapSym[pos]->prices[usableFiles-1], meanIncrements[pos], snapSym[pos]->nextPrice, snapSym[pos]->tradeCountPercent, totalTrades-i, totalTrades, tradeDeltas[pos]->wTradeCount, snapSym[pos]->sdPriceChange);
-   	    	tradeDeltas[pos]->wTradeVolume = volumeGenerator(snapSym[pos]->minVol, snapSym[pos]->maxVol, snapSym[pos]->wTradeVolume);
+   	    	tradeDeltas[pos]->wTradeVolume = volumeGenerator(snapSym[pos]->minVol, snapSym[pos]->maxVol, snapSym[pos]->wTradeVolume, snapSym[pos]->avVol);
    	    	tradesAndQuotes << tradeDeltas[pos]->wIssueSymbol << "		" << tradeDeltas[pos]->wTradePrice << "			" << tradeDeltas[pos]->wTradeCount << "			" << tradeDeltas[pos]->wTradeVolume << "		" <<  times[i] << endl;
    	    }
    	}
@@ -703,7 +766,7 @@ int main()
    		actualTotalTrades += tradeDeltas[i]->wTradeCount;
 
    	ofstream diagnosticsFile;
-   	diagnosticsFile.open("/Users/gtgmason/Documents/workspace/MarketDataGeneratorQUB/MarketDataGenerator/Debug/results/diag.txt");
+   	diagnosticsFile.open("results/diag.txt");
 
    	diagnosticsFile << setprecision(20);
    	diagnosticsFile << "Symbol		Generated		Generated %				Historical Trades			Historical %" << endl;

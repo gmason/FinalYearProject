@@ -12,7 +12,7 @@
 #include <iomanip>
 using namespace std;
 
-generatorTemplate::generatorTemplate(string _wIssueSymbol, vector<double> _prices, vector<double> _priceChanges, double _avPriceChange, double _sdPriceChange, double _percentPositive, std::vector<int> _wTradeVolume, int _minVol, int _maxVol, std::vector<double> _wTradeCount,  double _avTrades, double _sdTrades, long double _tradeCountPercent, double _nextPrice, int _nextTrades) {
+generatorTemplate::generatorTemplate(string _wIssueSymbol, vector<double> _prices, vector<double> _priceChanges, double _avPriceChange, double _sdPriceChange, double _percentPositive, std::vector<int> _wTradeVolume, int _minVol, int _maxVol, int _avVol, std::vector<double> _wTradeCount,  double _avTrades, double _sdTrades, long double _tradeCountPercent, double _nextPrice, int _nextTrades) {
 	wIssueSymbol = _wIssueSymbol;
 	prices = _prices;
 	priceChanges = _priceChanges;
@@ -22,6 +22,7 @@ generatorTemplate::generatorTemplate(string _wIssueSymbol, vector<double> _price
 	wTradeVolume = _wTradeVolume;
 	minVol = _minVol;
 	maxVol = _maxVol;
+	avVol = _avVol;
 	wTradeCount = _wTradeCount;
 	avTrades = _avTrades;
 	sdTrades = _sdTrades;
@@ -42,6 +43,9 @@ generatorTemplate::generatorTemplate() {
 	sdPriceChange = 0;
 	percentPositive = 0;
 //	wTradeVolume - no constructor required for vector.
+	minVol = 0;
+	maxVol = 0;
+	avVol = 0;
 //	wTradeCount - no constructor required for vector.
 	avTrades = 0;
 	sdTrades = 0;
@@ -100,6 +104,7 @@ void generatorTemplate::print(string filepath)
 
 	symbolDetails << endl << "Minimum Volume:	" << this->minVol;
 	symbolDetails << endl << "Maximum Volume:	" << this->maxVol;
+	symbolDetails << endl << "Average Volume:	" << this->avVol;
 
 	symbolDetails << setprecision(65);
 	symbolDetails << endl << "Trade Count %s:		" << this->tradeCountPercent << endl;
@@ -109,3 +114,16 @@ void generatorTemplate::print(string filepath)
 	symbolDetails.close();
 }
 
+void generatorTemplate::printVolumes(string filepath)
+{
+	ofstream volumes;
+	volumes.open(filepath.c_str(), ios::out | ios::app);
+
+	volumes << this->wIssueSymbol << "," << prices.size() << ",";
+	for (unsigned int i = 0; i < prices.size(); i++)
+		volumes << this->wTradeVolume[i] << ",";
+
+	volumes << this->avVol << endl;
+
+	volumes.close();
+}
