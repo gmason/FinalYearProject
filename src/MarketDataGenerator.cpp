@@ -205,6 +205,7 @@ int getdir (string dir, vector<string> &files)
     return 0;
 }
 
+/*
 int binarySearch(vector<long double> arr, long double value, int left, int right) {
 	//cout << value << endl;
 	while (left <= right) {
@@ -223,7 +224,7 @@ int binarySearch(vector<long double> arr, long double value, int left, int right
 	cout << "DEBUG:	arr[right]	" << arr[right]  << endl;
 	cout << "DEBUG:	value	" << value  << endl;
 	return -1;
-}
+}*/
 
 double valueGenerator(vector<double> &values, int size, double sd, double av, double high, double low, double percentPos)
 {
@@ -276,6 +277,8 @@ double getDecimalPart(double number){
    return temp;
 }
 
+
+/*
 vector<timetype> timeGenerator(int totalTrades, int openPercent, int closePercent)//, double thirdPeak, int thirdPeakPercent)
 {
 	vector<timetype> times;
@@ -319,8 +322,9 @@ vector<timetype> timeGenerator(int totalTrades, int openPercent, int closePercen
 	}
 
 	return times;
-}
+}*/
 
+/*
 double priceGenerator(double price, double meanIncrements, double targetPrice, long double probability, int tradesRemaining, int totalTrades, int tradeCount, double sd)
 {
 	double nextPrice = 0;
@@ -357,7 +361,7 @@ double priceGenerator(double price, double meanIncrements, double targetPrice, l
 	}
 
 	return nextPrice;
-}
+}*/
 
 double lowValue(vector<double> &values, int size)
 {
@@ -369,6 +373,7 @@ double lowValue(vector<double> &values, int size)
 	}
 	return lowest;
 }
+
 
 double highValue(vector<double> &values, int size)
 {
@@ -391,6 +396,7 @@ double avCalculator(vector<double> &values, int size)
 	return average;
 }
 
+/*
 int stringToInt(string x)
 {
 	stringstream convert(x);
@@ -399,9 +405,9 @@ int stringToInt(string x)
 		xInt = 0;
 
 	return xInt;
-}
+}*/
 
-double string_to_double( const std::string& s )
+double stringToDouble( const std::string& s )
 {
   std::istringstream i(s);
   double x;
@@ -606,7 +612,8 @@ int main()
 
     					avVol = avVol / usableFiles;
 
-        		        generatedSnapShot = new generatorTemplate(wIssueSymbol, prices, priceChanges, avPriceChange, sdPriceChange, percentPositive, tradeVolumes, minVol, maxVol, avVol, tradeCounts, avTradeCount, sdTradeCount, tradeCountPercent, nextPrice, nextTrades);
+        		        generatedSnapShot = new generatorTemplate(wIssueSymbol, prices, priceChanges, avPriceChange, sdPriceChange, percentPositive, \
+        		        		tradeVolumes, minVol, maxVol, avVol, tradeCounts, avTradeCount, sdTradeCount, tradeCountPercent, nextPrice, nextTrades);
     				}
     				break;
     			}
@@ -668,10 +675,39 @@ int main()
 
    	volumes.close();
 
+   	ofstream csvOut;
+   	string csvFile = "results/userDefine.csv";
+   	csvOut.open(csvFile.c_str());
+
+	csvOut << "Symbol,Days,";
+	for (unsigned int i = 0; i < snapSym[1]->prices.size(); i++)
+		csvOut << "Price Day " << i+1 << ",";
+
+	for (unsigned int i = 0; i < snapSym[1]->priceChanges.size(); i++)
+		csvOut << "Price change " << i+1 << ",";
+
+	csvOut << "Average Price Change,Standard Deviation of Price Changes,Percent Positive,";
+
+	for (unsigned int i = 0; i < snapSym[1]->wTradeVolume.size(); i++)
+		csvOut << "Trade Volume " << i+1 << ",";
+
+	csvOut << "Minimum Volume,Maximum Volume,Average Volume,";
+
+	for (unsigned int i = 0; i < snapSym[1]->wTradeCount.size(); i++)
+				csvOut << "Trade Count " << i+1 << ",";
+
+	csvOut << "Average Trades,Standard Deviation Trades,Trade Count %,Next Price,Next Trades" << endl;
+
+   	for (unsigned int k = 0; k < snapSym.size(); k++)
+   		snapSym[k]->printCsv(csvFile);
+
+   	csvOut.close();
+
    	string type;
-   	cout << "Pausing execution.. Please edit volumes.csv (file save as > windows csv in excel) now if you'd like to override values, or type anything to continue..." << endl;
+   	cout << "Stage 1 execution complete.. Please edit userDefine.csv (file save as > windows csv in excel) and then run the generator" << endl;
    	cin >> type;
 
+   	/*
    	vector<int> readVolumes;
    	ifstream volumesFile("results/volumes.csv");
     string token, line;
@@ -718,11 +754,10 @@ int main()
    	dice.open(diceFile.c_str());
 
    	vector<timetype> times;
-   	times = timeGenerator(totalTrades, 10, 10);//, 12.00, 10);
+   	times = timeGenerator(totalTrades, 10, 10);
 
    	for (int i = 0; i < totalTrades; i++)
    	{
-   	    //long double temp = getRandom(0, totalTradesPredicted);
    	    long double temp  = doubleRand();
    	    int pos = binarySearch(cumulativeTradePer, temp, 0, cumulativeTradePer.size());
 
@@ -760,6 +795,6 @@ int main()
    	diagnosticsFile << "The total trades: 			" << (int)actualTotalTrades << endl;
    	diagnosticsFile << "Total Trades percentage:		" << totalTradesPredicted << endl;
    	diagnosticsFile.close();
-
+   	*/
     return 0;
 }

@@ -34,6 +34,7 @@ class generatorTemplate {
 	public: int nextTrades;
 	public: void print(string symbolDetails);
 	public: void printVolumes(string symbolDetails);
+	public: void printCsv(string symbolDetails);
 public:
 	generatorTemplate(string, std::vector<double>, std::vector<double>, double, double, double, std::vector<int>, int, int, int, std::vector<double>, double, double, long double, double, int);
 	generatorTemplate();
